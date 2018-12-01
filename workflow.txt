@@ -1,0 +1,4 @@
+cd /DevProjects/LD48/tl; tl LD43 3
+psdwatch --postprocess /DevProjects/Tools/Graphics/pngstrip/build/Main --source watch.txt
+cd game; autobuild
+cd game; neko /DevProjects/Libs/plustd/package/run-src/run.n asset-watch .
