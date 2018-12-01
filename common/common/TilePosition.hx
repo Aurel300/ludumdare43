@@ -46,4 +46,13 @@ class TilePositionTools {
   public static function equals(a:TilePosition, b:TilePosition):Bool {
     return a.x == b.x && a.y == b.y;
   }
+  
+  public static function toPixel(tp:TilePosition):TilePosition {
+    var parity = tp.y & 1;
+    var rowPairs = Std.int(tp.y / 2);
+    return {
+         x: tp.x * 18 + parity * 18 + rowPairs * 18
+        ,y: -tp.x * 6 + parity * 6 + rowPairs * 18
+      };
+  }
 }

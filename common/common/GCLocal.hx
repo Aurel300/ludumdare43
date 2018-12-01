@@ -15,21 +15,21 @@ class GCLocal implements GameController {
         case Starting(0): StartingTurn(g.players[0]);
         case Starting(t): Starting(t - 1);
         case StartingTurn(p):
-        p.controller.beginTurn();
+        p.controller.beginTurn(p);
         // TODO: synchronise state if network
-        PlayerTurn(p, TURN_TIME);
+        PlayerTurn(p, Game.TURN_TIME);
         case PlayerTurn(p, 0): FinishingTurn(p);
-        case PlayerTurn(p, t): switch (p.controller.pollAction()) {
+        case PlayerTurn(p, t): switch (p.controller.pollAction(p)) {
             case Wait: stop = true; PlayerTurn(p, t - 1);
             case EndTurn: FinishingTurn(p);
           };
         case FinishingTurn(p):
-        p.controller.endTurn();
+        p.controller.endTurn(p);
         // TODO: synchronise state if network
         // TODO: check victory
         StartingTurn(g.players[(g.players.indexOf(p) + 1) % g.players.length]);
         //case GameOver(winner):
-        case _: stop = true; state;
+        case _: stop = true; g.state;
       });
   }
 }

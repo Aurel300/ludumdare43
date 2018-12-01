@@ -12,7 +12,8 @@ class Map {
   private static final MF_VARIATION_SHIFT = 4;
   private static final MF_VARIATION_MASK = 7; // 3 bits // 8 varations
   
-  public function new(file:Bytes) {
+  public function new(?file:Bytes) {
+    if (file == null) return;
     width = file.getInt32(0);
     height = file.getInt32(4);
     tiles = new Vector(width * height);
@@ -44,8 +45,12 @@ class Map {
     return ret;
   }
   
-  public function get(tp:TilePosition):Null<Tile> {
-    if (!tp.x.withinI(0, width - 1) || !tp.y.withinI(0, height - 1)) return null;
-    return tiles[tp.x + tp.y * width];
+  public function getXY(x:Int, y:Int):Null<Tile> {
+    if (!x.withinI(0, width - 1) || !y.withinI(0, height - 1)) return null;
+    return tiles[x + y * width];
+  }
+  
+  public inline function get(tp:TilePosition):Null<Tile> {
+    return getXY(tp.x, tp.y);
   }
 }

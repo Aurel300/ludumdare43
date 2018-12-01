@@ -19,11 +19,13 @@ class Main extends Application {
         ,Optional(Window("", 1000, 600))
         ,Surface(500, 300, 1)
         ,Assets([
+             Embed.getBitmap("game", "png/game.png")
+            ,new AssetBind(["game"], (am, _) -> { GSGame.load(am.getBitmap); false; })
           ])
         ,Keyboard
         ,Mouse
       ]);
-    preloader = new TNPreloader(this, "game");
+    preloader = new TNPreloader(this, "game", true);
     addState(new GSGame(this));
     mainLoop();
   }
