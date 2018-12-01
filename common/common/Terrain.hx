@@ -24,4 +24,19 @@ class TerrainTools {
       case TTWater: Inf;
       case TTVoid: Inf;
     };
+  
+  public static function variations(of:Terrain):Int return switch (of) {
+      case TTPlain: 4;
+      case TTDesert: 4;
+      case TTHill: 4;
+      case TTMountain: 4;
+      case TTWater: 5;
+      case _: 1;
+    };
+  
+  public static function height(of:Terrain):Int return switch (of) {
+      case TTHill: 2;
+      case TTMountain: 4;
+      case _: 0;
+    };
 }

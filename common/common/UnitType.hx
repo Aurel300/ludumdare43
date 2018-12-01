@@ -1,10 +1,11 @@
 package common;
 
-enum UnitType {
-  Melee;
-  Ranged;
-  Support;
-  Flying;
+@:enum
+abstract UnitType(Int) from Int to Int {
+  var Melee = 0;
+  var Ranged = 1;
+  var Support = 2;
+  var Flying = 3;
 }
 
 class UnitTypeTools {

@@ -15,11 +15,18 @@ class GSGame extends JamState {
     map.width = map.height = 15;
     map.tiles = new Vector(map.width * map.height);
     for (i in 0...map.tiles.length) {
-      map.tiles[i] = new Tile((cast FM.prng.nextMod(5):Terrain), 0, {x: i % map.width, y: (i / map.width).floor()}, map);
+      var terrain = (cast FM.prng.nextMod(5):Terrain);
+      var variation = FM.prng.nextMod(terrain.variations());
+      map.tiles[i] = new Tile(terrain, variation, {x: i % map.width, y: (i / map.width).floor()}, map);
+      if (FM.prng.nextMod(5) == 0) map.tiles[i].units.push(new Unit((cast FM.prng.nextMod(4):UnitType), map.tiles[i], player));
     }
     var start:TilePosition = {x: 5, y: 6};
     var neigh = start.neighbours();
-    for (n in neigh) map.get(n).terrain = TTVoid;
+    for (n in neigh) {
+      var tile = map.get(n);
+      tile.terrain = TTVoid;
+      tile.variation = 0;
+    }
     new Game(map, [player], ctrl);
   }
   
@@ -39,11 +46,18 @@ class GSGame extends JamState {
     var ti = 0;
     var camXI = camX.floor();
     var camYI = camY.floor();
-    for (y in 0...map.height) for (x in 0...map.width) {
-      var tile = map.getXY(x, y);
-      var screenPos = tile.position.toPixel();
-      ab.blitAlphaRect(B_GAME, screenPos.x + camXI, screenPos.y - 12 + camYI, (cast tile.terrain:Int) * 24, 0, 24, 24);
-      ti++;
+    for (y in 0...map.height) for (rx in 0...map.width) {
+      var tile = map.getXY(map.width - rx - 1, y);
+      if (tile != null) {
+        var screenPos = tile.position.toPixel();
+        ab.blitAlphaRect(B_GAME, screenPos.x + camXI, screenPos.y - 6 + camYI, (cast tile.terrain:Int) * 24, tile.variation * 18, 24, 18);
+        //for (building in tile.buildings) {
+        //  
+        //}
+        for (unit in tile.units) {
+          ab.blitAlphaRect(B_GAME, screenPos.x + camXI - 5, screenPos.y - 14 - tile.height + camYI, 0, 80 + (cast unit.type:Int) * 24, 32, 24);
+        }
+      }
     }
   }
 }

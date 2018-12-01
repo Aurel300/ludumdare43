@@ -4,6 +4,7 @@ class Unit {
   public var type:UnitType;
   public var tile:Tile;
   public var owner:Player;
+  
   public var hp:Int;
   public var mp:Int;
   
@@ -12,7 +13,11 @@ class Unit {
     return Pathfinding.getReach(tile, cost, mp).filter(t -> t.units.length == 0);
   }
   
-  public function new() {}
+  public function new(type:UnitType, tile:Tile, owner:Player) {
+    this.type = type;
+    this.tile = tile;
+    this.owner = owner;
+  }
   
   public function cost(from:Tile, to:Tile):InfInt return
     to.units.filter(u -> u.owner != owner).length > 0

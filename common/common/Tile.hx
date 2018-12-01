@@ -15,6 +15,11 @@ class Tile {
     return [ for (t in position.neighbours().map(map.get)) if (t != null) t ];
   }
   
+  public var height(get, never):Int;
+  private function get_height():Int {
+    return terrain.height();
+  }
+  
   public function new(terrain:Terrain, variation:Int, position:TilePosition, map:Map) {
     this.terrain = terrain;
     this.variation = variation;
