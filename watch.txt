@@ -1,0 +1,1 @@
+game:psd/game.psd:game/png/game.png

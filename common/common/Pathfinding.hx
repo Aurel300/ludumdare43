@@ -33,7 +33,7 @@ class Pathfinding {
             case Num(n): n;
             case Inf: continue;
           });
-        if (newCost > maxCost) continue;
+        if (maxCost != null && newCost > maxCost) continue;
         switch (n) {
           case NotVisited(t) | Visited(t, _, newCost < _ => true):
           queue.push({t: t, from: curQueue.t, cost: newCost});
@@ -87,7 +87,7 @@ class Pathfinding {
             case Num(n): n;
             case Inf: continue;
           });
-        if (newCost > maxCost) continue;
+        if (maxCost != null && newCost > maxCost) continue;
         switch (n) {
           case NotVisited(t) | Visited(t, _, newCost < _ => true):
           queue.push({t: t, from: curQueue.t, cost: newCost});

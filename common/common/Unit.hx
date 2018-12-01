@@ -9,7 +9,7 @@ class Unit {
   
   public var accessibleTiles(get, never):Array<Tile>;
   private function get_accessibleTiles():Array<Tile> {
-    return Pathfinding.getReach(tile, cost, mp);
+    return Pathfinding.getReach(tile, cost, mp).filter(t -> t.units.length == 0);
   }
   
   public function new() {}

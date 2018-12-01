@@ -7,33 +7,19 @@ class Game {
   public var map:Map;
   public var players:Array<Player>;
   public var state:GameState;
+  public var controller:GameController;
   
-  public function new() {
+  public function new(map:Map, players:Array<Player>, controller:GameController) {
+    this.map = map;
+    this.players = players;
+    state = Starting(0);
+    this.controller = controller;
     I = this;
+    controller.beginGame(this);
   }
   
   public function tick():Void {
-    var stop = false;
-    while (!stop) state = (switch (state) {
-        case Starting(0): StartingTurn(players[0]);
-        case Starting(t): Starting(t - 1);
-        case StartingTurn(p):
-        p.controller.beginTurn();
-        // TODO: synchronise state if network
-        PlayerTurn(p, TURN_TIME);
-        case PlayerTurn(p, 0): FinishingTurn(p);
-        case PlayerTurn(p, t): switch (p.controller.pollAction()) {
-            case Wait: stop = true; PlayerTurn(p, t - 1);
-            case EndTurn: FinishingTurn(p);
-          };
-        case FinishingTurn(p):
-        p.controller.endTurn();
-        // TODO: synchronise state if network
-        // TODO: check victory
-        StartingTurn(players[(players.indexOf(p) + 1) % players.length]);
-        //case GameOver(winner):
-        case _: stop = true; state;
-      });
+    controller.tick(this);
   }
 }
 
