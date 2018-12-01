@@ -6,9 +6,10 @@ class Pathfinding {
     ,to:Tile
     ,?cost:Tile->Tile->InfInt
     ,?maxCost:Int
-  ):Array<PFPathTile> {
+    ,?heuristic:Tile->Int
+  ):Array<Tile> {
     if (cost == null) cost = ((a, b) -> Num(a == b ? 0 : 1));
-    function heuristic(at:Tile):Int return at.position.distance(to.position);
+    if (heuristic == null) heuristic = at -> at.position.distance(to.position);
     var map = from.map;
     var augMap:Vector<PFPathTile> = map.tiles.map(NotVisited);
     function augGet(tp:TilePosition):Null<PFPathTile> {
@@ -19,26 +20,28 @@ class Pathfinding {
       if (!tp.x.withinI(0, map.width - 1) || !tp.y.withinI(0, map.height - 1)) return;
       augMap[tp.x + tp.y * map.width] = t;
     }
-    var queue:Array<PFPathTile> = [Queued(from, from, 0)];
-    while (queue.length > 0) switch (queue.shift()) {
-      case Queued(current, from, curCost):
-      for (n in current.position.neighbours().map(augGet)) if (n != null) {
+    var queue:Array<PFQueued> = [{t: from, from: from, cost: 0}];
+    while (queue.length > 0) {
+      var bestIdx = queue.streamArray().minIdx(q -> heuristic(q.t));
+      var curQueue = queue.splice(bestIdx, 1)[0];
+      for (n in curQueue.t.position.neighbours().map(augGet)) if (n != null) {
         var target = (switch (n) {
             case NotVisited(t) | Visited(t, _, _): t;
             case _: throw "?";
           });
-        var newCost = curCost + (switch (cost(current, target)) {
+        var newCost = curQueue.cost + (switch (cost(curQueue.t, target)) {
             case Num(n): n;
             case Inf: continue;
           });
+        if (newCost > maxCost) continue;
         switch (n) {
-          case NotVisited(t): augSet(t.position, Visited(t, current, newCost));
-          case Visited(t, from, newCost < _ => true): augSet(t.position, Visited(t, current, newCost));
+          case NotVisited(t) | Visited(t, _, newCost < _ => true):
+          queue.push({t: t, from: curQueue.t, cost: newCost});
+          augSet(t.position, Visited(t, curQueue.t, newCost));
           case Visited(_, _, _):
           case _: throw "?";
         }
       }
-      case _: throw "?";
     }
     return (switch (augGet(to.position)) {
         case Visited(t, from, cost):
@@ -47,7 +50,7 @@ class Pathfinding {
         while (true) switch (cur) {
           case Visited(t, from, cost):
           if (t.position.equals(from.position)) break;
-          ret.push(cur);
+          ret.push(t);
           cur = augGet(from.position);
           case _: break;
         }
@@ -61,13 +64,49 @@ class Pathfinding {
     ,?cost:Tile->Tile->InfInt
     ,?maxCost:Int
   ):Array<Tile> {
-    // Dijkstra
-    return null;
+    if (cost == null) cost = ((a, b) -> Num(a == b ? 0 : 1));
+    var map = from.map;
+    var augMap:Vector<PFPathTile> = map.tiles.map(NotVisited);
+    function augGet(tp:TilePosition):Null<PFPathTile> {
+      if (!tp.x.withinI(0, map.width - 1) || !tp.y.withinI(0, map.height - 1)) return null;
+      return augMap[tp.x + tp.y * map.width];
+    }
+    function augSet(tp:TilePosition, t:PFPathTile):Void {
+      if (!tp.x.withinI(0, map.width - 1) || !tp.y.withinI(0, map.height - 1)) return;
+      augMap[tp.x + tp.y * map.width] = t;
+    }
+    var queue:Array<PFQueued> = [{t: from, from: from, cost: 0}];
+    while (queue.length > 0) {
+      var curQueue = queue.shift();
+      for (n in curQueue.t.position.neighbours().map(augGet)) if (n != null) {
+        var target = (switch (n) {
+            case NotVisited(t) | Visited(t, _, _): t;
+            case _: throw "?";
+          });
+        var newCost = curQueue.cost + (switch (cost(curQueue.t, target)) {
+            case Num(n): n;
+            case Inf: continue;
+          });
+        if (newCost > maxCost) continue;
+        switch (n) {
+          case NotVisited(t) | Visited(t, _, newCost < _ => true):
+          queue.push({t: t, from: curQueue.t, cost: newCost});
+          augSet(t.position, Visited(t, curQueue.t, newCost));
+          case Visited(_, _, _):
+          case _: throw "?";
+        }
+      }
+    }
+    return [ for (i in 0...augMap.length) switch (augMap[i]) {
+        case Visited(t, _, _): t;
+        case _: continue;
+      } ];
   }
 }
+
+typedef PFQueued = {t:Tile, from:Tile, cost:Int};
 
 enum PFPathTile {
   NotVisited(t:Tile);
   Visited(t:Tile, from:Tile, cost:Int);
-  Queued(t:Tile, from:Tile, cost:Int);
 }
