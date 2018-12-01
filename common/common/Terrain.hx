@@ -13,6 +13,7 @@ abstract Terrain(Int) from Int to Int {
 class TerrainTools {
   public static function tdf(of:Terrain, f:UnitCategory):InfInt return switch (f) {
       case Ground: tdfG(of);
+      case Flying: tdfF(of);
       case _: Inf;
     };
   
@@ -23,6 +24,11 @@ class TerrainTools {
       case TTMountain: Num(3);
       case TTWater: Inf;
       case TTVoid: Inf;
+    };
+  
+  public static function tdfF(of:Terrain):InfInt return switch (of) {
+      case TTMountain: Num(2);
+      case _: Num(1);
     };
   
   public static function variations(of:Terrain):Int return switch (of) {

@@ -6,6 +6,7 @@ abstract UnitType(Int) from Int to Int {
   var Ranged = 1;
   var Support = 2;
   var Flying = 3;
+  var Monkey = 4;
 }
 
 class UnitTypeTools {
@@ -14,6 +15,7 @@ class UnitTypeTools {
       case Ranged: Ground;
       case Support: Ground;
       case Flying: Flying;
+      case Monkey: Ground;
     };
   
   public static inline function cost(of:UnitType, f:Faction):Int return switch [of, f] {
@@ -21,6 +23,7 @@ class UnitTypeTools {
       case [Ranged, _]: 5;
       case [Support, _]: 4;
       case [Flying, _]: 8;
+      case _: 0;
     };
   
   public static inline function maxHP(of:UnitType, f:Faction):Int return switch [of, f] {
@@ -28,6 +31,7 @@ class UnitTypeTools {
       case [Ranged, _]: 3;
       case [Support, _]: 3;
       case [Flying, _]: 4;
+      case _: 0;
     };
   
   public static inline function maxMP(of:UnitType, f:Faction):Int return switch [of, f] {
@@ -35,5 +39,6 @@ class UnitTypeTools {
       case [Ranged, _]: 2;
       case [Support, _]: 3;
       case [Flying, _]: 5;
+      case _: 0;
     };
 }

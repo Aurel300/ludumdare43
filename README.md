@@ -43,12 +43,21 @@ The map is covered with a fog of war which reveals the terrain and building type
  - `VIS` Vision
  - `STL` Stealth
 
-| Type    | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
-| ------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
-| Mêlée   | 6     | 5    | 3    | 2     | 1     | 1     | 3     | 0     | - |
-| Ranged  | 5     | 3    | 2    | 2     | 3     | 0     | 4     | 0     | - |
-| Support | 4     | 3    | 3    | 0     | 0     | 0     | 3     | 0     | Can repair 2HP per turn |
-| Flying  | 8     | 4    | 5    | 2     | 1     | 0     | 4     | 0     | Flies over water |
+Special attributes:
+
+ - Charge - `ATK` increased by `MP` spent before the attack
+ - Terrain affinity - `TDF = 1` for the given terrain
+ - Flying
+ - Swimming
+ - Repair - Can restore 2 `HP` on a friendly unit
+
+| Type           | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
+| -------------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
+| Bull           | 6     | 5    | 3    | 2*    | 1     | 1     | 2     | 0     | Charge |
+| Chamois        | 6     | 5    | 3    | 0*    | 1     | 1     | 2     | 0     | Charge, Mountain affinity |
+| Bombardier ant | 5     | 3    | 2    | 2     | 3     | 0     | 4     | 0     | - |
+| Bat            | 8     | 4    | 5    | 2     | 1     | 0     | 4     | 0     | Flying |
+| Monkey         | 4     | 3    | 3    | 0     | 0     | 0     | 3     | 0     | Repair |
 
 ### Basic building types ###
 
@@ -210,9 +219,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
      - easily extendable to AIs, local MP or even MP-over-server
    - view - animations, sprites, visual effects ...
  - model
-   - hex grid map
-     - data structure
-     - neighbors, pathfinding via A*
+   x hex grid map
    - tiles
      - contains buildings, units, terrain type
    - AI
@@ -221,11 +228,9 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
      - QA
      - AI simulation?
  - view
-   - hex grid calculations
-     - mouse to tile
-     - tile to XY
+   x hex grid calculations
    - display grid, tiles, units and buildings
-   - highlight tiles, units
+   . highlight tiles, units
    - display possible actions for units
      - visualise terrain difficulty
    - UI

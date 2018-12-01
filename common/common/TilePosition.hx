@@ -16,14 +16,59 @@ class TilePositionTools {
   public static function tpToCube(tp:TilePosition):TilePositionCube {
     var x = tp.x - Std.int((tp.y - (tp.y & 1)) / 2);
     var z = tp.y;
-    var y = - x - z;
+    var y = -x - z;
     return {x: x, y: y, z: z};
   }
   
   public static function cubeToTp(cube:TilePositionCube):TilePosition {
-    var x = cube.x + Std.int((cube.z - (cube.z & 1)) / 2);
+    var x = cube.x - Std.int((cube.z + (cube.z & 1)) / 2);
     var y = cube.z;
     return {x: x, y: y};
+  }
+  
+  public static function axialToCube<T:Float>(tp:{x:T, y:T}):{x:T, y:T, z:T} {
+    var x = tp.x;
+    var z = tp.y;
+    var y = -x - z;
+    return {x: x, y: y, z: z};
+  }
+  
+  public static function cubeToAxial(tp:TilePositionCube):TilePosition {
+    return {x: tp.x, y: tp.z};
+  }
+  
+  public static function axialToPixel<T:Float>(tp:{x:T, y:T}):{x:T, y:T} {
+    return {
+         x: tp.x * 18
+        ,y: -tp.x * 6 + tp.y * 12
+      };
+  }
+  
+  public static function pixelToAxial(tp:TilePosition):{x:Float, y:Float} {
+    return {
+         x: tp.x / 18
+        ,y: tp.x / 36 + tp.y / 12
+      };
+  }
+  
+  public static function cubeRound(cube:{x:Float, y:Float, z:Float}):TilePositionCube {
+    var rx = cube.x.round();
+    var ry = cube.y.round();
+    var rz = cube.z.round();
+    
+    var xDiff = (rx - cube.x).absF();
+    var yDiff = (ry - cube.y).absF();
+    var zDiff = (rz - cube.z).absF();
+    
+    if (xDiff > yDiff && xDiff > zDiff) {
+      rx = -ry - rz;
+    } else if (yDiff > zDiff) {
+      ry = -rx - rz;
+    } else {
+      rz = -rx - ry;
+    }
+    
+    return {x: rx, y: ry, z: rz};
   }
   
   public static function distance(a:TilePosition, b:TilePosition):Int {
@@ -35,8 +80,8 @@ class TilePositionTools {
   }
   
   static var oddrDirections = [
-       [[ 1,  0], [ 0, -1], [-1, -1], [-1,  0], [-1,  1], [ 0,  1]]
-      ,[[ 1,  0], [ 1, -1], [ 0, -1], [-1,  0], [ 0,  1], [ 1,  1]]
+       [[-1, -1], [ 0, -1], [-1,  0], [ 1,  0], [-1,  1], [ 0,  1]]
+      ,[[ 0, -1], [ 1, -1], [-1,  0], [ 1,  0], [ 0,  1], [ 1,  1]]
     ];
   
   public static function neighbours(tp:TilePosition):Array<TilePosition> {

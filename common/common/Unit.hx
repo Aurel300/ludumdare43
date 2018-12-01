@@ -10,13 +10,15 @@ class Unit {
   
   public var accessibleTiles(get, never):Array<Tile>;
   private function get_accessibleTiles():Array<Tile> {
-    return Pathfinding.getReach(tile, cost, mp).filter(t -> t.units.length == 0);
+    return Pathfinding.getReach(tile, cost, mp).filter(t -> t.units.length == 0).concat([tile]);
   }
   
   public function new(type:UnitType, tile:Tile, owner:Player) {
     this.type = type;
     this.tile = tile;
     this.owner = owner;
+    hp = 1;
+    mp = 5;
   }
   
   public function cost(from:Tile, to:Tile):InfInt return
