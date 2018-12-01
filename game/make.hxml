@@ -1,0 +1,7 @@
+-D PLUSTD_TARGET=js.canvas
+-lib plustd
+-cp /DevProjects/Fonts
+-cp /DevProjects/Libs/plustd/assets/thenet-preloader/lib
+-cp ../common
+-main Main
+-js game.js

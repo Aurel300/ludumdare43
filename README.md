@@ -184,7 +184,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
 | | - sacrifice **tile** | AoE attack (4 `ATK`, 2-wide hex area) |
 | | - sacrifice **turn** | ? |
 | | - sacrifice **money** | ? |
-| Harlequins | Dionysus | Trickery |
+| Harlequins | Dionysus | Trickery, Confusion?, Charm? |
 | | - passive | bonus to stealth? |
 | | - sacrifice **unit** | +2 `STL` on another unit for 1 turn |
 | | - sacrifice **tile** | ? |
