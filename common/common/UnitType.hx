@@ -8,6 +8,13 @@ enum UnitType {
 }
 
 class UnitTypeTools {
+  public static inline function category(of:UnitType):UnitCategory return switch (of) {
+      case Melee: Ground;
+      case Ranged: Ground;
+      case Support: Ground;
+      case Flying: Flying;
+    };
+  
   public static inline function cost(of:UnitType, f:Faction):Int return switch [of, f] {
       case [Melee, _]: 6;
       case [Ranged, _]: 5;
