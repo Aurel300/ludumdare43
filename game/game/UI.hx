@@ -170,6 +170,8 @@ class UI {
       case Space:
       localController.queuedActions.push(EndTurn);
       deselect();
+      case Tab:
+      mapRenderer.hpBarShow.toggle();
       case _: return false;
     }
     return true;

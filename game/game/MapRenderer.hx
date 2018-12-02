@@ -9,6 +9,7 @@ class MapRenderer {
   public var range:Array<Tile> = [];
   public var actions:Array<UnitAction> = [];
   public var rangeColour:Int = 0;
+  public var hpBarShow = new Bitween(15, true);
   
   var camXI:Int = 50;
   var camYI:Int = 50;
@@ -58,6 +59,9 @@ class MapRenderer {
      ab:Bitmap
     ,mx:Int, my:Int
   ) {
+    // tickers
+    hpBarShow.tick();
+    
     // update camera
     
     if (nextAngleProg != 0) {
@@ -93,12 +97,14 @@ class MapRenderer {
       var full = (range.indexOf(unit.tile) != -1 || unit.actionRelevant);
       var cx = bx + 7;
       var cy = by - (full ? 4 : 2);
+      var segH = full ? 12 : 6;
+      var segY = Timing.quartInOut.getI(hpBarShow.valueF, segH);
       for (i in 0...unit.stats.maxHP) {
         var which = unit.stats.HP >= i + 1 ? 1 : 0;
         if (full && which == 0 && (unit.stats.HP + ((unit.hurtTimer + 7) >> 3)) >= i + 1) {
           which = 2;
         }
-        ab.blitAlpha(GSGame.B_HP_BAR[which + (full ? 2 : 0)], cx, cy);
+        ab.blitAlphaRect(GSGame.B_HP_BAR[which + (full ? 2 : 0)], cx, cy + segH - segY, 0, 0, segY, segH);
         cx += full ? 4 : 3;
       }
       

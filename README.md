@@ -222,7 +222,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
  - QA
    - map - "none" terrain
    - RMB - cancel turn
-   - HP bars - toggle with Tab / button
+   - HP bars - toggle with button
    - moved / acted indicator
    - neutral units - capture?
    - capture - not instant - building HP, capture consecutively with single unit
