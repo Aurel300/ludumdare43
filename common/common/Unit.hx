@@ -40,14 +40,13 @@ class Unit {
     this.tile = tile;
     startingTile = tile;
     this.owner = owner;
-    stats = type.stats(owner.faction);
+    stats = type.stats(owner == null ? null : owner.faction);
   }
   
   public function damageTo(target:Unit, attacking:Bool):Int {
     if (attacking) {
       var dmg = 1.maxI(stats.ATK - target.stats.DEF);
       if (stats.charge) {
-        trace("charge", startingTile.position.distance(tile.position));
         dmg += startingTile.position.distance(tile.position);
       }
       return dmg;

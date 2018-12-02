@@ -1,8 +1,11 @@
 package game;
 
 class MapRenderer {
+  static final TURN_TIME = 25;
+  
   public var camX:Float = 50;
   public var camY:Float = 100;
+  public var camAngle:Float = 0;
   public var range:Array<Tile> = [];
   public var actions:Array<UnitAction> = [];
   public var rangeColour:Int = 0;
@@ -11,6 +14,10 @@ class MapRenderer {
   var camYI:Int = 50;
   var rangeT:Int = 0;
   var map:Map;
+  var prevAngle:Int = 0;
+  var deltaAngle:Int = 0;
+  var nextAngleProg:Float = 0;
+  var tilesSorted:Vector<Int>;
   
   static var RANGE_BORDERS_X = [0, 5, 0, 17, 5, 17];
   static var RANGE_BORDERS_W = [6, 12, 6, 6, 12, 6];
@@ -18,17 +25,37 @@ class MapRenderer {
   
   public function new(map:Map) {
     this.map = map;
+    sortTiles(true);
+  }
+  
+  public function turnAngle(delta:Int):Void {
+    if (nextAngleProg != 0) return;
+    deltaAngle = delta;
+    nextAngleProg = 1;
   }
   
   public function mouseToTp(mx:Int, my:Int):TilePosition {
     return {
          x: mx - camXI - 11
         ,y: my - camYI - 6
-      }.pixelToAxial().axialToCube().cubeRound().cubeToTp();
+      }.fromPixel(camAngle);
   }
   
   public inline function mouseToTile(mx:Int, my:Int):Null<Tile> {
     return map.get(mouseToTp(mx, my));
+  }
+  
+  public function sortTiles(?regen:Bool = false):Void {
+    if (regen) {
+      tilesSorted = new Vector(map.tiles.length);
+      for (i in 0...map.tiles.length) tilesSorted[i] = i;
+    }
+    function sort(ai:Int, bi:Int):Int {
+      var posA = map.tiles[ai].position.toPixel(camAngle);
+      var posB = map.tiles[bi].position.toPixel(camAngle);
+      return posA.y - posB.y;
+    }
+    tilesSorted.sort(sort);
   }
   
   public function renderMap(
@@ -36,6 +63,17 @@ class MapRenderer {
     ,mx:Int, my:Int
   ) {
     // update camera
+    
+    if (nextAngleProg != 0) {
+      camAngle = (6.0 + prevAngle + deltaAngle * Timing.quartInOut.getF(nextAngleProg / TURN_TIME)) * 60.0;
+      nextAngleProg++;
+      if (nextAngleProg >= TURN_TIME) {
+        prevAngle = (6 + prevAngle + deltaAngle) % 6;
+        camAngle = prevAngle * 60.0;
+        nextAngleProg = 0;
+      }
+      sortTiles();
+    }
     
     camXI = camX.floor();
     camYI = camY.floor();
@@ -61,10 +99,20 @@ class MapRenderer {
       ab.fillRect(bx + 7, by - 5, unit.stats.maxMP * 2 + 2, 3, GSGame.B_PAL[123]);
       if (unit.stats.MP > 0) ab.fillRect(bx + 8, by - 4, unit.stats.MP * 2, 2, GSGame.B_PAL[130]);
     }
-    for (y in 0...map.height) for (rx in 0...map.width) {
-      var tile = map.getXY(map.width - rx - 1, y);
+    for (sti in tilesSorted) {
+    //for (y in 0...map.height) for (x in 0...map.width) {
+      //var tile = map.getXY(camAngle.withinF(15, 195) ? x : map.width - x - 1, camAngle.withinF(0, 120) || camAngle >= 300 ? y : map.height - y - 1);
+      //var ax = x;
+      //var ay = y;
+      //switch (prevAngle) {
+      //  case 1: 
+      //  case 2: x = map.width - x - 1;
+      //  case _: 
+      //}
+      //var tile = map.getXY(ax, ay);
+      var tile = map.tiles[sti];
       if (tile != null) {
-        var screenPos = tile.position.toPixel();
+        var screenPos = tile.position.toPixel(camAngle);
         var rangeIndex = range.indexOf(tile);
         if (rangeIndex != -1) screenPos.y--;
         if (tile.buildings.length > 0) {
@@ -100,7 +148,7 @@ class MapRenderer {
           }
         }
         for (unit in tile.offsetUnits) {
-          renderUnit(unit, unit.tile, unit.tile.position.toPixel());
+          renderUnit(unit, unit.tile, unit.tile.position.toPixel(camAngle));
         }
         tile.offsetUnits = [];
         if (tile.terrain == TTWater && FM.prng.nextMod(100) == 0)
@@ -115,7 +163,7 @@ class MapRenderer {
           case Repair(target): type = 1; target.tile.position;
           case Capture(target): type = 2; target.tile.position;
         });
-      var screenPos = tilePosition.toPixel();
+      var screenPos = tilePosition.toPixel(camAngle);
       if (type == -1) continue;
       ab.blitAlpha(
            GSGame.B_ACTIONS[type][rangeColour]

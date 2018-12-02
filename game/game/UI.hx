@@ -24,8 +24,8 @@ class UI {
   public function tick():Void {
     // logic
     function mkOff(from:TilePosition, to:TilePosition):TilePosition {
-      var fromPixel = from.toPixel();
-      var toPixel = to.toPixel();
+      var fromPixel = from.toPixel(mapRenderer.camAngle);
+      var toPixel = to.toPixel(mapRenderer.camAngle);
       return {x: toPixel.x - fromPixel.x, y: toPixel.y - fromPixel.y};
     }
     function applyOff(unit:Unit, off:TilePosition, from:TilePosition, prog:Float):Void {

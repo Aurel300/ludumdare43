@@ -26,6 +26,13 @@ class TilePositionTools {
     return {x: x, y: y};
   }
   
+  public static function tpToAxial(tp:TilePosition):TilePosition {
+    return {
+         x: tp.x + ((tp.y + 1) >> 1)
+        ,y: tp.y
+      };
+  }
+  
   public static function axialToCube<T:Float>(tp:{x:T, y:T}):{x:T, y:T, z:T} {
     var x = tp.x;
     var z = tp.y;
@@ -44,7 +51,7 @@ class TilePositionTools {
       };
   }
   
-  public static function pixelToAxial(tp:TilePosition):{x:Float, y:Float} {
+  public static function pixelToAxial<T:Float>(tp:{x:T, y:T}):{x:Float, y:Float} {
     return {
          x: tp.x / 18
         ,y: tp.x / 36 + tp.y / 12
@@ -101,12 +108,26 @@ class TilePositionTools {
     return a.x == b.x && a.y == b.y;
   }
   
-  public static function toPixel(tp:TilePosition):TilePosition {
-    var parity = tp.y & 1;
-    var rowPairs = Std.int(tp.y / 2);
+  static final MUL = Math.sqrt(3);
+  
+  public static function toPixel(tp:TilePosition, camAngle:Float):TilePosition {
+    var rad = (camAngle / 180.0) * Math.PI;
+    var c = Math.cos(rad);
+    var s = Math.sin(rad);
+    var pixel = axialToPixel(tpToAxial(tp));
     return {
-         x: tp.x * 18 + parity * 18 + rowPairs * 18
-        ,y: -tp.x * 6 + parity * 6 + rowPairs * 18
+         x: (c * pixel.x - s * (pixel.y * MUL)).round()
+        ,y: ((s * pixel.x + c * (pixel.y * MUL)) / MUL).round()
       };
+  }
+  
+  public static function fromPixel(tp:TilePosition, camAngle:Float):TilePosition {
+    var rad = (camAngle / 180.0) * Math.PI;
+    var c = Math.cos(-rad);
+    var s = Math.sin(-rad);
+    return inline cubeToTp(cubeRound(axialToCube(pixelToAxial({
+         x: (c * tp.x - s * (tp.y * MUL)).round()
+        ,y: ((s * tp.x + c * (tp.y * MUL)) / MUL).round()
+      }))));
   }
 }

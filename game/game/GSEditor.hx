@@ -74,6 +74,7 @@ class GSEditor extends JamState {
           mapRenderer.camY -= 12 * addNP;
         }
       }
+      mapRenderer.sortTiles(true);
       // select terrain, building, or unit
       case KeyZ | KeyX | KeyC | KeyV | KeyB | KeyN:
       switch (mode) {

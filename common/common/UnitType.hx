@@ -37,7 +37,7 @@ class UnitTypeTools {
       ,Monkey => {CYC: 4, HP: 3, MP: 3, ATK: 0, RNG: 0, DEF: 0, VIS: 3, STL: 0, repair: true}
     ];
   
-  public static function stats(of:UnitType, f:Faction):UnitStats {
+  public static function stats(of:UnitType, f:Null<Faction>):UnitStats {
     var stats = TYPE_STATS[of];
     return {
          CYC: stats.CYC

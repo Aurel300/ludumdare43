@@ -99,7 +99,6 @@ class GCLocal implements GameController {
       case AttackUnit(u, target, dmg, attacking):
       if (!attacking) u.stats.defended = true;
       target.stats.HP -= dmg;
-      trace("after attack", target.stats.HP);
       case RemoveUnit(u):
       u.tile.units.remove(u);
       case CaptureBuilding(b, by):

@@ -84,6 +84,10 @@ class GSGame extends JamState {
   }
   
   override public function tick():Void {
+    // controls
+    mapRenderer.camX -= 3.negposF(ak(KeyA), ak(KeyD));
+    mapRenderer.camY -= 3.negposF(ak(KeyW), ak(KeyS));
+    
     // logic
     ui.tick();
     Game.I.tick();
@@ -101,9 +105,11 @@ class GSGame extends JamState {
        ui.keyUp(key)
     || ({
       switch (key) {
-        case KeyQ: // switch to editor
+        case KeyQ: mapRenderer.turnAngle(-1);
+        case KeyE: mapRenderer.turnAngle(1);
+        case KeyO: // switch to editor
         st("editor");
-        case KeyW: // import map, switch to editor
+        case KeyP: // import map, switch to editor
         GSEditor.map = Game.I.map;
         st("editor");
         case _:
