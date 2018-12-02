@@ -11,11 +11,12 @@ class GSGame extends JamState {
   public static var B_BUILDINGS:Vector<Vector<FluentBitmap>>; // type, player
   public static var B_UNITS:Vector<Vector<FluentBitmap>>; // type, player
   public static var B_RANGE_BORDERS:Vector<Vector<Vector<FluentBitmap>>>; // phase, bit, player
-  public static var B_ACTIONS:Vector<Vector<FluentBitmap>>; // action, player
+  public static var B_ACTIONS:Vector<FluentBitmap>; // action
+  public static var B_HP_BAR:Vector<FluentBitmap>; // 0,1 = small, 2,3,4 = full
   
-  public static var RANGE_BORDERS_X = [0, 5, 0, 17, 5, 17];
-  public static var RANGE_BORDERS_W = [6, 12, 6, 6, 12, 6];
-  public static var RANGE_BORDERS_Y = [0, 0, 6, 0, 6, 6];
+  public static var RANGE_BORDERS_X = [0,  5,  17, 17, 5,  0];
+  public static var RANGE_BORDERS_W = [6,  12, 6,  6,  12, 6];
+  public static var RANGE_BORDERS_Y = [0,  0,  0,  6,  6,  6];
   
   public static function load(amB:String->Bitmap):Void {
     B_GAME = amB("game").fluent;
@@ -49,12 +50,13 @@ class GSGame extends JamState {
           ])
       ]);
     B_ACTIONS = Vector.fromArrayCopy([ for (i in 0...3)
-        Vector.fromArrayCopy([ for (c in 0...5)
-            B_GAME >> new Cut(192, i * 16, 24, 16)
-              << new ReplaceColour(Colour.WHITE, B_PLAYER_COLOURS[c])
-              << new ReplaceColour(Colour.BLACK, B_PLAYER_COLOURS_DARK[c])
-          ])
+        B_GAME >> new Cut(192, i * 16, 24, 16)
       ]);
+    B_HP_BAR = Vector.fromArrayCopy([ for (i in 0...2)
+        B_GAME >> new Cut(216 + i * 8, 0, 4, 6)
+      ].concat([ for (i in 0...3)
+        B_GAME >> new Cut(216 + i * 8, 8, 5, 12)
+      ]));
   }
   
   var mapRenderer:MapRenderer;

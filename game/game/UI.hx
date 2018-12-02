@@ -38,9 +38,13 @@ class UI {
     while (handlingUpdate != null) switch (handlingUpdate) {
       case MoveUnit(u, from, to, _) if (handlingTimer < MOVE_TIME):
       applyOff(u, mkOff(from, to), from, -1 + handlingTimer / MOVE_TIME);
+      u.actionRelevant = true;
       handlingTimer++;
       break;
       case AttackUnit(au, du, dmg, attack) if (handlingTimer < ATTACK_TIME):
+      du.hurtTimer = dmg * 8;
+      au.actionRelevant = true;
+      du.actionRelevant = true;
       if (au.tile.position.distance(du.tile.position) <= 1) {
         applyOff(au, mkOff(au.tile.position, du.tile.position), au.tile.position, handlingTimer / ATTACK_TIME);
       } else {
@@ -48,7 +52,8 @@ class UI {
       }
       handlingTimer++;
       break;
-      case MoveUnit(u, _, _, _) | AttackUnit(u, _, _, _): u.offX = u.offY = 0; u.displayTile = null; done();
+      case AttackUnit(u, du, _, _): u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; du.actionRelevant = false; done();
+      case MoveUnit(u, _, _, _): u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
       case _: done();
     }
   }

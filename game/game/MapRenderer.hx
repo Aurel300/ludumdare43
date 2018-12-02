@@ -19,10 +19,6 @@ class MapRenderer {
   var nextAngleProg:Float = 0;
   var tilesSorted:Vector<Int>;
   
-  static var RANGE_BORDERS_X = [0, 5, 0, 17, 5, 17];
-  static var RANGE_BORDERS_W = [6, 12, 6, 6, 12, 6];
-  static var RANGE_BORDERS_Y = [0, 0, 6, 0, 6, 6];
-  
   public function new(map:Map) {
     this.map = map;
     sortTiles(true);
@@ -78,7 +74,6 @@ class MapRenderer {
     camXI = camX.floor();
     camYI = camY.floor();
     
-    var rangeUnit = null;
     var rangeBorders = null;
     if (range.length > 0) {
       rangeT++;
@@ -94,10 +89,23 @@ class MapRenderer {
           ,bx
           ,by
         );
-      ab.fillRect(bx + 7, by - 2, unit.stats.maxHP * 2 + 2, 4, GSGame.B_PAL[31]);
-      if (unit.stats.HP > 0) ab.fillRect(bx + 8, by - 1, unit.stats.HP * 2, 2, GSGame.B_PAL[29]);
-      ab.fillRect(bx + 7, by - 5, unit.stats.maxMP * 2 + 2, 3, GSGame.B_PAL[123]);
-      if (unit.stats.MP > 0) ab.fillRect(bx + 8, by - 4, unit.stats.MP * 2, 2, GSGame.B_PAL[130]);
+      
+      var full = (range.indexOf(unit.tile) != -1 || unit.actionRelevant);
+      var cx = bx + 7;
+      var cy = by - (full ? 4 : 2);
+      for (i in 0...unit.stats.maxHP) {
+        var which = unit.stats.HP >= i + 1 ? 1 : 0;
+        if (full && which == 0 && (unit.stats.HP + ((unit.hurtTimer + 7) >> 3)) >= i + 1) {
+          which = 2;
+        }
+        ab.blitAlpha(GSGame.B_HP_BAR[which + (full ? 2 : 0)], cx, cy);
+        cx += full ? 4 : 3;
+      }
+      
+      //ab.fillRect(bx + 7, by - 2, unit.stats.maxHP * 2 + 2, 4, GSGame.B_PAL[31]);
+      //if (unit.stats.HP > 0) ab.fillRect(bx + 8, by - 1, unit.stats.HP * 2, 2, GSGame.B_PAL[29]);
+      //ab.fillRect(bx + 7, by - 5, unit.stats.maxMP * 2 + 2, 3, GSGame.B_PAL[123]);
+      //if (unit.stats.MP > 0) ab.fillRect(bx + 8, by - 4, unit.stats.MP * 2, 2, GSGame.B_PAL[130]);
     }
     for (sti in tilesSorted) {
     //for (y in 0...map.height) for (x in 0...map.width) {
@@ -132,7 +140,7 @@ class MapRenderer {
         var rangeIndex = range.indexOf(tile);
         if (rangeIndex != -1) {
           var borders = rangeBorders[rangeIndex];
-          for (rb in 0...6) if (borders[rb]) {
+          for (rb in 0...6) if (borders[(6 + rb - prevAngle) % 6]) {
             ab.blitAlpha(
                  GSGame.B_RANGE_BORDERS[(rangeT >> 3) + 1][rb][rangeColour]
                 ,screenPos.x + camXI + GSGame.RANGE_BORDERS_X[rb]
@@ -141,6 +149,7 @@ class MapRenderer {
           }
         }
         for (unit in tile.units) {
+          if (unit.hurtTimer > 0) unit.hurtTimer--;
           if (unit.displayTile != null) {
             unit.displayTile.offsetUnits.push(unit);
           } else {
@@ -166,7 +175,7 @@ class MapRenderer {
       var screenPos = tilePosition.toPixel(camAngle);
       if (type == -1) continue;
       ab.blitAlpha(
-           GSGame.B_ACTIONS[type][rangeColour]
+           GSGame.B_ACTIONS[type]
           ,screenPos.x + camXI
           ,screenPos.y + camYI
         );

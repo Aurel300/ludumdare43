@@ -11,6 +11,9 @@ class Unit {
   public var offX:Float = 0;
   public var offY:Float = 0;
   public var displayTile:Tile = null;
+  public var prevHealth:Int = 0;
+  public var hurtTimer:Int = 0;
+  public var actionRelevant:Bool = false;
   
   public var accessibleTiles(get, never):Array<Tile>;
   private function get_accessibleTiles():Array<Tile> {
@@ -41,6 +44,7 @@ class Unit {
     startingTile = tile;
     this.owner = owner;
     stats = type.stats(owner == null ? null : owner.faction);
+    prevHealth = stats.HP;
   }
   
   public function damageTo(target:Unit, attacking:Bool):Int {

@@ -122,6 +122,7 @@ class GSEditor extends JamState {
           return;
         });
       map.decode(players, data);
+      mapRenderer.sortTiles(true);
       // toggle terrain / building mode
       case Space: mode = (switch (mode) {
           case EMTerrain: EMUnit;
