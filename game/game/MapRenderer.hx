@@ -65,26 +65,36 @@ class MapRenderer {
         var rangeIndex = range.indexOf(tile);
         if (rangeIndex != -1) screenPos.y--;
         if (tile.buildings.length > 0) {
-          ab.blitAlphaRect(GSGame.B_GAME, screenPos.x + camXI - 5, screenPos.y - 20 + camYI, 32, 72 + (cast tile.buildings[0].type:Int) * 32, 32, 32);
+          var building = tile.buildings[0];
+          ab.blitAlpha(
+               GSGame.B_BUILDINGS[(cast building.type:Int)][building.owner.playerColour()]
+              ,screenPos.x - 5 + camXI
+              ,screenPos.y - 20 + camYI
+            );
         } else {
-          ab.blitAlphaRect(GSGame.B_GAME, screenPos.x + camXI, screenPos.y - 6 + camYI, (cast tile.terrain:Int) * 24, tile.variation * 18, 24, 18);
+          ab.blitAlpha(
+               GSGame.B_TERRAIN[(cast tile.terrain:Int)][tile.variation]
+              ,screenPos.x + camXI
+              ,screenPos.y - 6 + camYI
+            );
         }
         var rangeIndex = range.indexOf(tile);
         if (rangeIndex != -1) {
           var borders = rangeBorders[rangeIndex];
           for (rb in 0...6) if (borders[rb]) {
-            ab.blitAlphaRect(
-               GSGame.B_GAME
-              ,screenPos.x + camXI + RANGE_BORDERS_X[rb]
-              ,screenPos.y + camYI + RANGE_BORDERS_Y[rb]
-              ,168 + RANGE_BORDERS_X[rb]
-              ,((rangeT >> 3) + 1) * 16 + RANGE_BORDERS_Y[rb]
-              ,RANGE_BORDERS_W[rb]
-              ,6);
+            ab.blitAlpha(
+                 GSGame.B_RANGE_BORDERS[(rangeT >> 3) + 1][rb]
+                ,screenPos.x + camXI + GSGame.RANGE_BORDERS_X[rb]
+                ,screenPos.y + camYI + GSGame.RANGE_BORDERS_Y[rb]
+              );
           }
         }
         for (unit in tile.units) {
-          ab.blitAlphaRect(GSGame.B_GAME, screenPos.x + camXI - 5, screenPos.y - 14 - tile.height + camYI, 0, 80 + (cast unit.type:Int) * 24, 32, 24);
+          ab.blitAlpha(
+               GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
+              ,screenPos.x - 5 + camXI
+              ,screenPos.y - 14 - tile.height + camYI
+            );
         }
         if (tile.terrain == TTWater && FM.prng.nextMod(100) == 0)
         tile.variation = FM.prng.nextMod(tile.terrain.variations());

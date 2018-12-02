@@ -54,7 +54,7 @@ Special attributes:
 | Type           | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
 | -------------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
 | Bull           | 6     | 5    | 3    | 2*    | 1     | 1     | 2     | 0     | Charge |
-| Chamois        | 6     | 5    | 3    | 0*    | 1     | 1     | 2     | 0     | Charge, Mountain affinity |
+| Chamois        | 6     | 5    | 3    | 0*    | 1     | 1     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
 | Bombardier ant | 5     | 3    | 2    | 2     | 3     | 0     | 4     | 0     | - |
 | Bat            | 8     | 4    | 5    | 2     | 1     | 0     | 4     | 0     | Flying |
 | Monkey         | 4     | 3    | 3    | 0     | 0     | 0     | 3     | 0     | Repair |
@@ -65,7 +65,7 @@ Special attributes:
 | ----------- | ------- |
 | Temple-tron | Captured = owner defeated + effects of Shrine |
 | Factory     | Produces units |
-| Upgrade (?) | Provides 1 technological advance (for the rest of the game) |
+| Forge       | Provides 1 technological advance (for the rest of the game) |
 | Fortress    | Units on fortress tile get +1 DEF, +1 VIS, +1 STL |
 | Shrine      | Provides [ownership](#land-ownership) of nearby land |
 
@@ -108,10 +108,13 @@ During this phase, `DU` deals some damage back to to `AU`. This phase only happe
     DU.RNG >= dst(AU, DU) (range)
     DU.ATK > 0 (can attack)
     DU.HP > 0 (did not die)
+    !DU.defended (did not defend this turn)
 
-This phase will not take place if `DU` was destroyed during the previous phase (last condition). The amount of damage is subtracted from the HP of `AU`, and is:
+This phase will not take place if `DU` was destroyed during the previous phase (third condition) or if `DU` already defended against an attack (last condition). The amount of damage is subtracted from the HP of `AU`, and is:
 
     DMG = `DU`.ATK - `AU`.DEF
+
+`DU.defended` is reset at the beginning of `DU`'s owner's turn.
 
 ### Unit movement ###
 

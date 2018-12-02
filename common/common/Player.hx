@@ -4,6 +4,7 @@ class Player {
   public static final INIT_CYCLES = 10;
   
   public var name:String;
+  public var colourIndex:Int = 2;
   public var faction:Faction;
   public var controller:PlayerController;
   public var cycles:Int;
