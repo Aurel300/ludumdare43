@@ -221,12 +221,10 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
 
  - QA
    - map - "none" terrain
-   - no outlines!
    - RMB - cancel turn
-   - HP bars - toggle with Tab / button - segmented - neutral colour
-   - MP bars - no MP bar - moved / acted indicator
+   - HP bars - toggle with Tab / button
+   - moved / acted indicator
    - neutral units - capture?
-   - action overlay - single colour?
    - capture - not instant - building HP, capture consecutively with single unit
      - capture - first into neutral (half the time), then into own
    - action - click to show action stats + button
@@ -235,7 +233,6 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
      - easily extendable to AIs, local MP or even MP-over-server
    - view - animations, sprites, visual effects ...
  - model
-   x hex grid map
    - AI
    - balancing
      - unit types, stats

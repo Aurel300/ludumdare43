@@ -21,6 +21,7 @@ class GSGame extends JamState {
   public static function load(amB:String->Bitmap):Void {
     B_GAME = amB("game").fluent;
     B_PAL = Vector.fromArrayCopy([ for (i in 0...15 * 9) B_GAME.get(64 + (i % 15) * 2, 72 + (i / 15).floor() * 4) ]);
+    var grays = Vector.fromArrayCopy(B_PAL.toArray().slice(0, 13));
     B_PLAYER_COLOURS = Vector.fromArrayCopy([B_PAL[11]].concat([ for (i in 0...4) B_PAL[29 + i * 30] ]));
     B_PLAYER_COLOURS_DARK = Vector.fromArrayCopy([B_PAL[5]].concat([ for (i in 0...4) B_PAL[31 + i * 30] ]));
     B_TERRAIN = Vector.fromArrayCopy([ for (i in 0...(cast Terrain.TTVoid:Int) + 1)
@@ -28,16 +29,30 @@ class GSGame extends JamState {
             B_GAME >> new Cut(i * 24, j * 18, 23, 18)
           ])
       ]);
+    function recolour(b:FluentBitmap, player:Int):FluentBitmap {
+      if (player != 0) {
+        var vec = b.getVector();
+        for (i in 0...vec.length) {
+          var c = vec[i];
+          if (c.isTransparent) continue;
+          var closest = Colour.quantise(c, grays);
+          vec[i] = B_PAL[15 + (player - 1) * 30 + closest];
+        }
+        b.setVector(vec);
+      }
+      return b;
+    }
     B_BUILDINGS = Vector.fromArrayCopy([ for (i in 0...(cast BuildingType.BTShrine:Int) + 1)
-        Vector.fromArrayCopy([ for (c in B_PLAYER_COLOURS) {
+        Vector.fromArrayCopy([ for (player in 0...5) {
             var b = B_GAME >> new Cut(64, 108, 32, 32);
-            b.blitAlpha(B_GAME >> new Cut(32, 72 + i * 32, 32, 32) << new GlowBox(c), 0, 0);
+            b.blitAlpha(recolour(B_GAME >> new Cut(32, 72 + i * 32, 32, 32), player), 0, 0);
             b;
           } ])
       ]);
     B_UNITS = Vector.fromArrayCopy([ for (i in 0...(cast UnitType.Monkey:Int) + 1)
-        Vector.fromArrayCopy([ for (c in B_PLAYER_COLOURS)
-            B_GAME >> new Cut(0, 80 + i * 24, 32, 24) << new GlowBox(c)
+        Vector.fromArrayCopy([ for (player in 0...5)
+            recolour(B_GAME >> new Cut(0, 80 + i * 24, 32, 24), player)
+            //B_GAME >> new Cut(0, 80 + i * 24, 32, 24) << new GlowBox(c)
           ])
       ]);
     B_RANGE_BORDERS = Vector.fromArrayCopy([ for (i in 0...4)

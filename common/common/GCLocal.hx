@@ -36,7 +36,7 @@ class GCLocal implements GameController {
           queuedUpdates.push(RemoveUnit(target));
         } else if (!target.stats.defended) {
           var dmgD = target.damageTo(u, false);
-          if (dmgD > 0) {
+          if (dmgD > 0 && target.stats.RNG >= target.tile.position.distance(u.tile.position)) {
             queuedUpdates.push(AttackUnit(target, u, dmgD, false));
             if (u.stats.HP - dmgD <= 0) {
               queuedUpdates.push(RemoveUnit(u));
