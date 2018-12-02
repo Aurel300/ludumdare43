@@ -2,6 +2,7 @@ package game;
 
 import haxe.ds.Vector;
 import sk.thenet.app.JamState;
+import sk.thenet.app.Keyboard.Key;
 import sk.thenet.bmp.*;
 import common.*;
 

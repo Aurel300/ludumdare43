@@ -17,8 +17,8 @@ class Unit {
     this.type = type;
     this.tile = tile;
     this.owner = owner;
-    hp = 1;
-    mp = 5;
+    hp = type.maxHP(owner.faction);
+    mp = type.maxMP(owner.faction);
   }
   
   public function cost(from:Tile, to:Tile):InfInt return

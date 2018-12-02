@@ -14,6 +14,7 @@ class TerrainTools {
   public static function tdf(of:Terrain, f:UnitCategory):InfInt return switch (f) {
       case Ground: tdfG(of);
       case Flying: tdfF(of);
+      case Swimming: tdfS(of);
       case _: Inf;
     };
   
@@ -29,6 +30,11 @@ class TerrainTools {
   public static function tdfF(of:Terrain):InfInt return switch (of) {
       case TTMountain: Num(2);
       case _: Num(1);
+    };
+  
+  public static function tdfS(of:Terrain):InfInt return switch (of) {
+      case TTWater: Num(1);
+      case _: Inf;
     };
   
   public static function variations(of:Terrain):Int return switch (of) {

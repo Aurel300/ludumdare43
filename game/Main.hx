@@ -25,8 +25,9 @@ class Main extends Application {
         ,Keyboard
         ,Mouse
       ]);
-    preloader = new TNPreloader(this, "game", true);
+    preloader = new TNPreloader(this, "editor", true);
     addState(new GSGame(this));
+    addState(new GSEditor(this));
     mainLoop();
   }
 }
