@@ -48,6 +48,19 @@ class MapRenderer {
       rangeBorders = range.map(tile -> [ for (n in tile.neighboursAll) n == null || range.indexOf(n) == -1 ]);
     }
     
+    function renderUnit(unit:Unit, tile:Tile, screenPos:TilePosition):Void {
+      var bx = screenPos.x + unit.offX.round() - 5 + camXI;
+      var by = screenPos.y + unit.offY.round() - 14 - tile.height + camYI;
+      ab.blitAlpha(
+           GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
+          ,bx
+          ,by
+        );
+      ab.fillRect(bx + 7, by - 2, unit.stats.maxHP * 2 + 2, 4, GSGame.B_PAL[31]);
+      if (unit.stats.HP > 0) ab.fillRect(bx + 8, by - 1, unit.stats.HP * 2, 2, GSGame.B_PAL[29]);
+      ab.fillRect(bx + 7, by - 5, unit.stats.maxMP * 2 + 2, 3, GSGame.B_PAL[123]);
+      if (unit.stats.MP > 0) ab.fillRect(bx + 8, by - 4, unit.stats.MP * 2, 2, GSGame.B_PAL[130]);
+    }
     for (y in 0...map.height) for (rx in 0...map.width) {
       var tile = map.getXY(map.width - rx - 1, y);
       if (tile != null) {
@@ -83,20 +96,11 @@ class MapRenderer {
           if (unit.displayTile != null) {
             unit.displayTile.offsetUnits.push(unit);
           } else {
-            ab.blitAlpha(
-                 GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
-                ,screenPos.x + unit.offX.round() - 5 + camXI
-                ,screenPos.y + unit.offY.round() - 14 - tile.height + camYI
-              );
+            renderUnit(unit, tile, screenPos);
           }
         }
         for (unit in tile.offsetUnits) {
-          var screenPos = unit.tile.position.toPixel();
-          ab.blitAlpha(
-               GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
-              ,screenPos.x + unit.offX.round() - 5 + camXI
-              ,screenPos.y + unit.offY.round() - 14 - unit.tile.height + camYI
-            );
+          renderUnit(unit, unit.tile, unit.tile.position.toPixel());
         }
         tile.offsetUnits = [];
         if (tile.terrain == TTWater && FM.prng.nextMod(100) == 0)

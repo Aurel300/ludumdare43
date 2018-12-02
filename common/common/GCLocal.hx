@@ -36,7 +36,7 @@ class GCLocal implements GameController {
           queuedUpdates.push(RemoveUnit(target));
         } else if (!target.stats.defended) {
           var dmgD = target.damageTo(u, false);
-          if (dmgD >= 0) {
+          if (dmgD > 0) {
             queuedUpdates.push(AttackUnit(target, u, dmgD, false));
             if (u.stats.HP - dmgD <= 0) {
               queuedUpdates.push(RemoveUnit(u));
@@ -62,6 +62,7 @@ class GCLocal implements GameController {
             unit.startingTile = tile;
             unit.stats.moved = false;
             unit.stats.acted = false;
+            unit.stats.defended = false;
             unit.stats.MP = unit.stats.maxMP;
           }
         }
@@ -98,6 +99,7 @@ class GCLocal implements GameController {
       case AttackUnit(u, target, dmg, attacking):
       if (!attacking) u.stats.defended = true;
       target.stats.HP -= dmg;
+      trace("after attack", target.stats.HP);
       case RemoveUnit(u):
       u.tile.units.remove(u);
       case CaptureBuilding(b, by):

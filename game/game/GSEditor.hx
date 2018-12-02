@@ -3,11 +3,14 @@ package game;
 using Lambda;
 
 class GSEditor extends JamState {
-  var map:Map;
+  public static var I:GSEditor;
+  public static var map:Map;
+  
   var mapRenderer:MapRenderer;
-  var modeTerrain:Bool = false;
+  var mode:EditorMode = EMTerrain;
   var selectedTerrain:Terrain = TTPlain;
   var selectedBuilding:BuildingType = BTTempleTron;
+  var selectedUnit:UnitType = Bull;
   var mouseHeld:Bool = false;
   var brush:Int = 0;
   var selectedOwner:Player = null;
@@ -16,14 +19,20 @@ class GSEditor extends JamState {
   function mkTile(x:Int, y:Int):Tile return new Tile(selectedTerrain, FM.prng.nextMod(selectedTerrain.variations()), {x: x, y: y}, map);
   
   public function new(app) {
+    I = this;
     super("editor", app);
     players = [new Player("P1", Juggernauts, null), new Player("P2", Juggernauts, null)];
     players[0].colourIndex = 1;
     players[1].colourIndex = 2;
-    map = new Map(players, null);
-    map.width = map.height = 2;
-    map.tiles = new Vector(map.width * map.height);
-    for (i in 0...map.tiles.length) map.tiles[i] = mkTile(i % map.width, (i / map.width).floor());
+  }
+  
+  override public function to():Void {
+    if (map == null) {
+      map = new Map(players, null);
+      map.width = map.height = 2;
+      map.tiles = new Vector(map.width * map.height);
+      for (i in 0...map.tiles.length) map.tiles[i] = mkTile(i % map.width, (i / map.width).floor());
+    }
     mapRenderer = new MapRenderer(map);
   }
   
@@ -65,17 +74,39 @@ class GSEditor extends JamState {
           mapRenderer.camY -= 12 * addNP;
         }
       }
-      // select terrain or building
-      case KeyZ: if (modeTerrain) selectedTerrain = TTPlain; else selectedBuilding = BTTempleTron;
-      case KeyX: if (modeTerrain) selectedTerrain = TTDesert; else selectedBuilding = BTFactoreon;
-      case KeyC: if (modeTerrain) selectedTerrain = TTHill; else selectedBuilding = BTForge;
-      case KeyV: if (modeTerrain) selectedTerrain = TTMountain; else selectedBuilding = BTFortress;
-      case KeyB: if (modeTerrain) selectedTerrain = TTWater; else selectedBuilding = BTShrine;
-      case KeyN: if (modeTerrain) selectedTerrain = TTVoid;
+      // select terrain, building, or unit
+      case KeyZ | KeyX | KeyC | KeyV | KeyB | KeyN:
+      switch (mode) {
+        case EMTerrain: selectedTerrain = (switch (k) {
+            case KeyZ: TTPlain;
+            case KeyX: TTDesert;
+            case KeyC: TTHill;
+            case KeyV: TTMountain;
+            case KeyB: TTWater;
+            case KeyN: TTVoid;
+            case _: return;
+          });
+        case EMBuilding: selectedBuilding = (switch (k) {
+            case KeyZ: BTTempleTron;
+            case KeyX: BTFactoreon;
+            case KeyC: BTForge;
+            case KeyV: BTFortress;
+            case KeyB: BTShrine;
+            case _: return;
+          });
+        case EMUnit: selectedUnit = (switch (k) {
+            case KeyZ: Bull;
+            case KeyX: Chamois;
+            case KeyC: BombardierAnt;
+            case KeyV: Bat;
+            case KeyB: Monkey;
+            case _: return;
+          });
+      }
       // select brush or player
-      case KeyI: if (modeTerrain) brush = 0; else selectedOwner = null;
-      case KeyO: if (modeTerrain) brush = 1; else selectedOwner = players[0];
-      case KeyP: if (modeTerrain) brush = 2; else selectedOwner = players[1];
+      case KeyI: if (mode == EMTerrain) brush = 0; else selectedOwner = null;
+      case KeyO: if (mode == EMTerrain) brush = 1; else selectedOwner = players[0];
+      case KeyP: if (mode == EMTerrain) brush = 2; else selectedOwner = players[1];
       case KeyT: // exporT
       var data = map.encode();
       var b64 = haxe.crypto.Base64.encode(data);
@@ -91,7 +122,19 @@ class GSEditor extends JamState {
         });
       map.decode(players, data);
       // toggle terrain / building mode
-      case Space: modeTerrain = !modeTerrain;
+      case Space: mode = (switch (mode) {
+          case EMTerrain: EMUnit;
+          case EMBuilding: EMTerrain;
+          case EMUnit: EMBuilding;
+        });
+      case KeyR: // restore HP / MP for units
+      for (tile in map.tiles) for (unit in tile.units) {
+        unit.stats.HP = unit.stats.maxHP;
+        unit.stats.MP = unit.stats.maxMP;
+      }
+      case KeyQ: // test in game
+      GSGame.I.initMap(map.encode());
+      st("game");
       case _:
     }
   }
@@ -102,7 +145,7 @@ class GSEditor extends JamState {
       mapRenderer.camX -= 3.negposF(ak(KeyA), ak(KeyD));
       mapRenderer.camY -= 3.negposF(ak(KeyW), ak(KeyS));
     }
-    var selectionRange = (modeTerrain ? brush : 0);
+    var selectionRange = (mode == EMTerrain ? brush : 0);
     
     // rendering
     ab.fill(Colour.BLACK);
@@ -113,7 +156,8 @@ class GSEditor extends JamState {
     mapRenderer.renderMap(ab, app.mouse.x, app.mouse.y);
     
     // UI
-    if (modeTerrain) {
+    switch (mode) {
+      case EMTerrain:
       for (i in 0...6) {
         ab.blitAlpha(
              GSGame.B_TERRAIN[(cast i:Terrain)][0]
@@ -121,12 +165,20 @@ class GSEditor extends JamState {
             ,300 - 20 - ((cast i:Terrain) == selectedTerrain ? 4 : 0)
           );
       }
-    } else {
+      case EMBuilding:
       for (i in 0...5) {
         ab.blitAlpha(
              GSGame.B_BUILDINGS[(cast i:BuildingType)][selectedOwner.playerColour()]
             ,3 + i * 18
             ,300 - 34 - ((cast i:BuildingType) == selectedBuilding ? 4 : 0)
+          );
+      }
+      case EMUnit:
+      for (i in 0...5) {
+        ab.blitAlpha(
+             GSGame.B_UNITS[(cast i:UnitType)][selectedOwner.playerColour()]
+            ,3 + i * 18
+            ,300 - 26 - ((cast i:UnitType) == selectedUnit ? 4 : 0)
           );
       }
     }
@@ -135,25 +187,37 @@ class GSEditor extends JamState {
   function brushTick():Void {
     var tile = mapRenderer.mouseToTile(app.mouse.x, app.mouse.y);
     if (tile == null) return;
-    if (modeTerrain) {
+    switch (mode) {
+      case EMTerrain:
       for (t in map.tiles) {
         if (t.position.distance(tile.position) <= brush) {
           if (t.buildings.length > 0) t.buildings = [];
+          if (t.units.length > 0) t.units = [];
           t.terrain = selectedTerrain;
           t.variation = FM.prng.nextMod(selectedTerrain.variations());
         }
       }
-    } else {
+      case EMBuilding:
       tile.terrain = TTPlain;
       tile.variation = 0;
       tile.buildings = [new Building(selectedBuilding, tile, selectedOwner)];
+      if (tile.units.length > 0) tile.units = [];
+      case EMUnit:
+      tile.units = [new Unit(selectedUnit, tile, selectedOwner)];
+      if (tile.buildings.length > 0) tile.buildings[0].owner = selectedOwner;
     }
   }
   
   override public function mouseDown(mx:Int, my:Int):Void { mouseHeld = true; brushTick(); }
   override public function mouseUp(mx:Int, my:Int):Void mouseHeld = false;
   override public function mouseMove(mx:Int, my:Int):Void {
-    if (!mouseHeld || !modeTerrain) return;
+    if (!mouseHeld || mode != EMTerrain) return;
     brushTick();
   }
+}
+
+enum EditorMode {
+  EMTerrain;
+  EMBuilding;
+  EMUnit;
 }

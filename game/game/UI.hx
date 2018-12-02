@@ -120,6 +120,7 @@ class UI {
       var accessible = unit.accessibleTiles;
       var actions = unit.accessibleActions;
       if (unit.stats.acted) return false;
+      if (unit.owner != localController.activePlayer) return false;
       for (action in actions) if (switch (action) {
           case Attack(u) | Repair(u): u.tile == target;
           case Capture(building): building.tile == target;
@@ -128,8 +129,7 @@ class UI {
           return true;
         }
       if (target != unit.tile
-        && accessible.indexOf(target) != -1
-        && unit.owner == localController.activePlayer) {
+        && accessible.indexOf(target) != -1) {
         localController.queuedActions.push(MoveUnit(unit, target));
         return true;
       }

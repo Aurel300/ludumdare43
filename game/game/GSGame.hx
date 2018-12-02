@@ -1,6 +1,8 @@
 package game;
 
 class GSGame extends JamState {
+  public static var I:GSGame;
+  
   public static var B_GAME:FluentBitmap;
   public static var B_PAL:Vector<Colour>;
   public static var B_PLAYER_COLOURS:Vector<Colour>;
@@ -60,20 +62,25 @@ class GSGame extends JamState {
   var ui:UI;
   
   public function new(app) {
+    I = this;
     super("game", app);
+    initMap(Map.MAPS["tutorial"]);
+  }
+  
+  public function initMap(mf:haxe.io.Bytes):Void {
     var gameController = new GCLocal();
     var playerController = new PCLocal();
     var players = [
          new Player("P1", Juggernauts, playerController)
         ,new Player("P2", Juggernauts, playerController)
       ];
-    var map = new Map(players, Map.MAPS["tutorial"]);
-    map.getXY(4, 5).units.push(new Unit(Bull, map.getXY(4, 5), players[0]));
-    map.getXY(2, 5).units.push(new Unit(Bat, map.getXY(2, 5), players[0]));
-    map.getXY(3, 8).units.push(new Unit(Chamois, map.getXY(3, 8), players[1]));
+    var map = new Map(players, mf);
     mapRenderer = new MapRenderer(map);
     ui = new UI(mapRenderer, playerController, gameController);
     new Game(map, players, gameController);
+  }
+  
+  override public function to():Void {
   }
   
   override public function tick():Void {
@@ -90,7 +97,20 @@ class GSGame extends JamState {
   override public function mouseDown(mx:Int, my:Int):Void ui.mouseDown(mx, my);
   override public function mouseUp(mx:Int, my:Int):Void ui.mouseUp(mx, my);
   override public function mouseMove(mx:Int, my:Int):Void ui.mouseMove(mx, my);
-  override public function keyUp(key:Key):Void ui.keyUp(key);
+  override public function keyUp(key:Key):Void {
+       ui.keyUp(key)
+    || ({
+      switch (key) {
+        case KeyQ: // switch to editor
+        st("editor");
+        case KeyW: // import map, switch to editor
+        GSEditor.map = Game.I.map;
+        st("editor");
+        case _:
+      }
+      true;
+    });
+  }
 }
 
 class RenderTools {
