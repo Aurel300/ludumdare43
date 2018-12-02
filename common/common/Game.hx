@@ -12,6 +12,7 @@ class Game {
   public function new(map:Map, players:Array<Player>, controller:GameController) {
     this.map = map;
     this.players = players;
+    for (i in 0...players.length) players[i].colourIndex = i + 1;
     state = Starting(0);
     this.controller = controller;
     I = this;

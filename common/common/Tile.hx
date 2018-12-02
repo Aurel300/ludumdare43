@@ -10,6 +10,9 @@ class Tile {
   public var buildings:Array<Building> = [];
   public var owner:Player;
   
+  // visuals only
+  public var offsetUnits:Array<Unit> = [];
+  
   public var neighboursAll(get, never):Array<Tile>;
   private function get_neighboursAll():Array<Tile> {
     return [ for (t in position.neighbours().map(map.get)) t ];

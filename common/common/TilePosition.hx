@@ -14,7 +14,7 @@ typedef TilePositionCube = {
 
 class TilePositionTools {
   public static function tpToCube(tp:TilePosition):TilePositionCube {
-    var x = tp.x - Std.int((tp.y - (tp.y & 1)) / 2);
+    var x = tp.x - (tp.y >> 1);
     var z = tp.y;
     var y = -x - z;
     return {x: x, y: y, z: z};
@@ -71,15 +71,24 @@ class TilePositionTools {
     return {x: rx, y: ry, z: rz};
   }
   
+  public static function cubeSub(a:TilePositionCube, b:TilePositionCube):TilePositionCube {
+    return {x: a.x - b.x, y: a.y - b.y, z: a.z - b.z};
+  }
+  
   public static function distance(a:TilePosition, b:TilePosition):Int {
     return cubeDistance(tpToCube(a), tpToCube(b));
   }
   
   public static function cubeDistance(a:TilePositionCube, b:TilePositionCube):Int {
-    return Std.int(((a.x - b.x).absI() + (a.y - b.y).absI() + (a.z - b.z).absI()) / 2);
+    var dist = (a.x - b.x).absI();
+    var dy = (a.y - b.y).absI();
+    var dz = (a.z - b.z).absI();
+    if (dy > dist) dist = dy;
+    if (dz > dist) dist = dz;
+    return dist;
   }
   
-  static var oddrDirections = [
+  public static var oddrDirections = [
        [[-1, -1], [ 0, -1], [-1,  0], [ 1,  0], [-1,  1], [ 0,  1]]
       ,[[ 0, -1], [ 1, -1], [-1,  0], [ 1,  0], [ 0,  1], [ 1,  1]]
     ];

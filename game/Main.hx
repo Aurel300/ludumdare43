@@ -20,12 +20,18 @@ class Main extends Application {
         ,Surface(500, 300, 1)
         ,Assets([
              Embed.getBitmap("game", "png/game.png")
-            ,new AssetBind(["game"], (am, _) -> { GSGame.load(am.getBitmap); false; })
+            ,Embed.getBitmap(font.FontNS.ASSET_ID, "png/ns8x16.png")
+            ,new AssetTrigger("gameA", ["game"], (am, _) -> { GSGame.load(am.getBitmap); false; })
+            ,new AssetTrigger("text", [/*font.FontBasic3x9.ASSET_ID, font.FontFancy8x13.ASSET_ID, */font.FontNS.ASSET_ID, "gameA"], (am, _) -> {
+              Text.load(am);
+              consoleFont = Text.fonts[0];
+              false;
+            })
           ])
         ,Keyboard
         ,Mouse
       ]);
-    preloader = new TNPreloader(this, "editor", true);
+    preloader = new TNPreloader(this, "game", true);
     addState(new GSGame(this));
     addState(new GSEditor(this));
     mainLoop();

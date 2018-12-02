@@ -20,6 +20,7 @@ class Pathfinding {
       if (!tp.x.withinI(0, map.width - 1) || !tp.y.withinI(0, map.height - 1)) return;
       augMap[tp.x + tp.y * map.width] = t;
     }
+    augSet(from.position, Visited(from, from, 0));
     var queue:Array<PFQueued> = [{t: from, from: from, cost: 0}];
     while (queue.length > 0) {
       var bestIdx = queue.streamArray().minIdx(q -> heuristic(q.t));

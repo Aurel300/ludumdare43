@@ -12,6 +12,8 @@ typedef UnitStats = {
     ,VIS:Int
     ,STL:Int
     ,SLW:Int
+    ,moved:Bool
+    ,acted:Bool
     ,defended:Bool
     ,charge:Bool
     ,repair:Bool

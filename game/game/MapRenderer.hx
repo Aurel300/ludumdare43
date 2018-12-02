@@ -4,6 +4,8 @@ class MapRenderer {
   public var camX:Float = 50;
   public var camY:Float = 100;
   public var range:Array<Tile> = [];
+  public var actions:Array<UnitAction> = [];
+  public var rangeColour:Int = 0;
   
   var camXI:Int = 50;
   var camYI:Int = 50;
@@ -40,18 +42,6 @@ class MapRenderer {
     
     var rangeUnit = null;
     var rangeBorders = null;
-    
-    var mouseTile = mouseToTile(mx, my);
-    if (mouseTile != null && mouseTile.units.length > 0) {
-      //range = [mouseTile];
-      //rangeBorders = [[ for (i in 0...6) true ]];
-      rangeUnit = mouseTile.units[0];
-    }
-    
-    if (rangeUnit != null) {
-      range = rangeUnit.accessibleTiles;
-    }
-    
     if (range.length > 0) {
       rangeT++;
       rangeT %= 3 * 8;
@@ -83,22 +73,51 @@ class MapRenderer {
           var borders = rangeBorders[rangeIndex];
           for (rb in 0...6) if (borders[rb]) {
             ab.blitAlpha(
-                 GSGame.B_RANGE_BORDERS[(rangeT >> 3) + 1][rb]
+                 GSGame.B_RANGE_BORDERS[(rangeT >> 3) + 1][rb][rangeColour]
                 ,screenPos.x + camXI + GSGame.RANGE_BORDERS_X[rb]
                 ,screenPos.y + camYI + GSGame.RANGE_BORDERS_Y[rb]
               );
           }
         }
         for (unit in tile.units) {
+          if (unit.displayTile != null) {
+            unit.displayTile.offsetUnits.push(unit);
+          } else {
+            ab.blitAlpha(
+                 GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
+                ,screenPos.x + unit.offX.round() - 5 + camXI
+                ,screenPos.y + unit.offY.round() - 14 - tile.height + camYI
+              );
+          }
+        }
+        for (unit in tile.offsetUnits) {
+          var screenPos = unit.tile.position.toPixel();
           ab.blitAlpha(
                GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
-              ,screenPos.x - 5 + camXI
-              ,screenPos.y - 14 - tile.height + camYI
+              ,screenPos.x + unit.offX.round() - 5 + camXI
+              ,screenPos.y + unit.offY.round() - 14 - unit.tile.height + camYI
             );
         }
+        tile.offsetUnits = [];
         if (tile.terrain == TTWater && FM.prng.nextMod(100) == 0)
         tile.variation = FM.prng.nextMod(tile.terrain.variations());
       }
+    }
+    
+    for (a in actions) {
+      var type = -1;
+      var tilePosition = (switch (a) {
+          case Attack(target): type = 0; target.tile.position;
+          case Repair(target): type = 1; target.tile.position;
+          case Capture(target): type = 2; target.tile.position;
+        });
+      var screenPos = tilePosition.toPixel();
+      if (type == -1) continue;
+      ab.blitAlpha(
+           GSGame.B_ACTIONS[type][rangeColour]
+          ,screenPos.x + camXI
+          ,screenPos.y + camYI
+        );
     }
   }
 }

@@ -45,7 +45,7 @@ The map is covered with a fog of war which reveals the terrain and building type
 
 Special attributes:
 
- - Charge - `ATK` increased by `MP` spent before the attack
+ - Charge - `ATK` increased by hex distance from tile before movement
  - Terrain affinity - `TDF = 1` for the given terrain
  - Flying
  - Swimming
@@ -101,6 +101,8 @@ During this phase, `AU` deals some damage to `DU`. The amount of damage is subtr
 
     DMG = max(1, `AU`.ATK - `DU`.DEF)
 
+At least one point of damage is always dealt.
+
 #### `DU` damage to `AU` ####
 
 During this phase, `DU` deals some damage back to to `AU`. This phase only happens if:
@@ -112,9 +114,9 @@ During this phase, `DU` deals some damage back to to `AU`. This phase only happe
 
 This phase will not take place if `DU` was destroyed during the previous phase (third condition) or if `DU` already defended against an attack (last condition). The amount of damage is subtracted from the HP of `AU`, and is:
 
-    DMG = `DU`.ATK - `AU`.DEF
+    DMG = max(0, DU.ATK - AU.DEF)
 
-`DU.defended` is reset at the beginning of `DU`'s owner's turn.
+Unlike the fisrt phase, it is possible that the defending damage is zero. `DU.defended` is reset at the beginning of `DU`'s owner's turn.
 
 ### Unit movement ###
 
@@ -223,8 +225,6 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
    - view - animations, sprites, visual effects ...
  - model
    x hex grid map
-   - tiles
-     - contains buildings, units, terrain type
    - AI
    - balancing
      - unit types, stats
@@ -232,7 +232,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
      - AI simulation?
  - view
    x hex grid calculations
-   - display grid, tiles, units and buildings
+   x display grid, tiles, units and buildings
    . highlight tiles, units
    - display possible actions for units
      - visualise terrain difficulty

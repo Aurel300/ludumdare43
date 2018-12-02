@@ -51,6 +51,8 @@ class UnitTypeTools {
         ,VIS: stats.VIS
         ,STL: stats.STL
         ,SLW: 0
+        ,moved: false
+        ,acted: false
         ,defended: false
         ,charge: stats.charge != null ? stats.charge : false
         ,repair: stats.repair != null ? stats.repair : false
