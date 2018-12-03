@@ -57,11 +57,11 @@ class Unit {
   public function damageTo(target:Unit, attacking:Bool):Int {
     if (attacking) {
       var dmg = 1.maxI(stats.ATK - target.stats.DEF);
-      if (stats.charge) {
-        dmg += startingTile.position.distance(tile.position);
-      }
+      if (stats.charge) dmg += startingTile.position.distance(tile.position);
+      if (stats.healthATK) dmg += stats.HP;
       return dmg;
     } else {
+      if (stats.siege) return 0;
       return 0.maxI(stats.ATK - target.stats.DEF);
     }
   }

@@ -4,4 +4,5 @@ enum UnitCategory {
   Ground;
   Flying;
   Swimming;
+  Amphibian;
 }

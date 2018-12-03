@@ -15,7 +15,16 @@ typedef UnitStats = {
     ,moved:Bool
     ,acted:Bool
     ,defended:Bool
+    ,tier:Int
+    ,capture:Bool
+    ,maxCount:Int
     ,charge:Bool
     ,repair:Bool
     ,affinity:Array<Terrain>
+    ,weakStart:Bool
+    ,healthATK:Bool
+    ,kamikaze:Bool
+    ,siege:Bool
+    ,camouflage:Bool
+    ,medusaGaze:Bool
   };

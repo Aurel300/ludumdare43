@@ -86,7 +86,7 @@ Special attributes:
 
 | Type        | Special |
 | ----------- | ------- |
-| Temple-tron | Captured = owner defeated + effects of Shrine |
+| Temple-tron | Captured = owner defeated, Effects of Shrine, Effects of Factoreon |
 | Factoreon   | Produces ground units |
 | Dock        | Produces swimming and amphibian units |
 | Eyrie       | Produces flying units |
