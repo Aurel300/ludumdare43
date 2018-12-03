@@ -17,6 +17,8 @@ class GSGame extends JamState {
   public static var B_UI_BOX_CONFIRM:Vector<FluentBitmap>; // normal, held
   public static var BM_BOX:Box;
   public static var B_CAPTURE:Vector<FluentBitmap>; // capture, raze
+  public static var B_STATS:Vector<Vector<FluentBitmap>>; // tab count, active tab
+  public static var B_PERK:Vector<FluentBitmap>;
   
   public static var RANGE_BORDERS_X = [0,  5,  17, 17, 5,  0];
   public static var RANGE_BORDERS_W = [6,  12, 6,  6,  12, 6];
@@ -86,6 +88,27 @@ class GSGame extends JamState {
     B_CAPTURE = Vector.fromArrayCopy([ for (i in 0...2)
         B_GAME >> new Cut(240, i * 16, 51, 16)
       ]);
+    BM_BOX.width = 150;
+    BM_BOX.height = 70;
+    var statsBase = B_UI_BOX >> BM_BOX;
+    B_STATS = Vector.fromArrayCopy([ for (i in 0...3)
+        Vector.fromArrayCopy([ for (j in 0...i + 1) {
+            var b = statsBase >> new Grow(0, 0, 9, 0);
+            for (t in 0...i + 1) {
+              b.blitAlpha(
+                   B_GAME >> new Cut(216 + (t == 0 ? 0 : 32), 96 + (j == t ? 0 : 24), 30, 20)
+                  ,-2 + t * 24
+                  ,0
+                );
+            }
+            b;
+          } ])
+      ]);
+    B_PERK = Vector.fromArrayCopy([ for (i in 0...4)
+        B_GAME >> new Cut(240 + i * 24, 144, 24, 24)
+      ].concat([ for (i in 0...5)
+        B_GAME >> new Cut(240 + i * 24, 168, 24, 24)
+      ]));
   }
   
   public static function makeUIBox(to:Bitmap, x:Int, y:Int, w:Int, h:Int):Void {
@@ -145,11 +168,13 @@ class GSGame extends JamState {
       switch (key) {
         case KeyQ: mapRenderer.turnAngle(-1);
         case KeyE: mapRenderer.turnAngle(1);
-        case KeyO: // switch to editor
+        case KeyP: // switch to editor
         st("editor");
+        /*
         case KeyP: // import map, switch to editor
         GSEditor.map = Game.I.map;
         st("editor");
+        */
         case _:
       }
       true;
@@ -160,5 +185,17 @@ class GSGame extends JamState {
 class RenderTools {
   public static function playerColour(of:Null<Player>):Colour {
     return of == null ? 0 : of.colourIndex;
+  }
+  
+  public static function tileBitmap(of:Tile):Bitmap {
+    return GSGame.B_TERRAIN[(cast of.terrain:Int)][of.variation];
+  }
+  
+  public static function unitBitmap(of:Unit):Bitmap {
+    return GSGame.B_UNITS[(cast of.type:Int)][playerColour(of.owner)];
+  }
+  
+  public static function buildingBitmap(of:Building):Bitmap {
+    return GSGame.B_BUILDINGS[(cast of.type:Int)][playerColour(of.owner)];
   }
 }

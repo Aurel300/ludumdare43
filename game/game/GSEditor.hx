@@ -118,7 +118,8 @@ class GSEditor extends JamState {
       case KeyT: // exporT
       var data = map.encode();
       var b64 = haxe.crypto.Base64.encode(data);
-      untyped __js__("navigator.clipboard.writeText({0})", b64);
+      //untyped __js__("navigator.clipboard.writeText({0})", b64);
+      (cast js.Browser.document.getElementById("editor_out"):js.html.TextAreaElement).value = b64;
       case KeyY: // Ymport
       var b64 = js.Browser.window.prompt("import data (or empty)");
       if (b64.length < 4 * 3) return;

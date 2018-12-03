@@ -103,11 +103,7 @@ class MapRenderer {
     function renderUnit(unit:Unit, tile:Tile, screenPos:TilePosition):Void {
       var bx = screenPos.x + unit.offX.round() - 5 + camXI;
       var by = screenPos.y + unit.offY.round() - 14 - tile.height + camYI;
-      ab.blitAlpha(
-           GSGame.B_UNITS[(cast unit.type:Int)][unit.owner.playerColour()]
-          ,bx
-          ,by
-        );
+      ab.blitAlpha(unit.unitBitmap(), bx, by);
       
       var full = (range.indexOf(unit.tile) != -1 || unit.actionRelevant);
       var cx = bx + 7;
@@ -133,13 +129,13 @@ class MapRenderer {
         if (tile.buildings.length > 0) {
           var building = tile.buildings[0];
           ab.blitAlpha(
-               GSGame.B_BUILDINGS[(cast building.type:Int)][building.owner.playerColour()]
+               building.buildingBitmap()
               ,screenPos.x - 5 + camXI
               ,screenPos.y - 20 + camYI
             );
         } else {
           ab.blitAlpha(
-               GSGame.B_TERRAIN[(cast tile.terrain:Int)][tile.variation]
+               tile.tileBitmap()
               ,screenPos.x + camXI
               ,screenPos.y - 6 + camYI
             );

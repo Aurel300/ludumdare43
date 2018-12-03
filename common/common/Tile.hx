@@ -28,6 +28,17 @@ class Tile {
     return terrain.height();
   }
   
+  public var name(get, never):String;
+  private function get_name():String return (switch (terrain) {
+      case TTPlain: "Plains";
+      case TTDesert: "Desert";
+      case TTHill: "Hills";
+      case TTMountain: "Mountains";
+      case TTWater: "Water";
+      case TTVoid: "Void";
+      case TTNone: "None";
+    });
+  
   public function new(terrain:Terrain, variation:Int, position:TilePosition, map:Map) {
     this.terrain = terrain;
     this.variation = variation;

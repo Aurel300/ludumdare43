@@ -65,8 +65,8 @@ Special attributes:
 | 1 | Spider         | 4     | 2    | 4    | 1     | 1     | 0     | 3     | 1     | Capturing, Desert affinity |
 | 1 | Monkey         | 4     | 1    | 2    | 0     | 0     | 2     | 1     | 0     | Capturing, Repair, Mountain affinity, Hill affinity, Max count 2 |
 | 2 | Bombardier ant | 6     | 3    | 2    | 2     | 4     | 0     | 1     | 0     | Siege |
+| 2 | Chamois        | 6     | 4    | 4    | 1     | 1     | 0     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
 | 3 | Bull           | 10    | 6    | 3    | 2     | 1     | 1     | 2     | 0     | Charge |
-| 3 | Chamois        | 10    | 6    | 3    | 0     | 1     | 1     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
 | 4 | Hog            | 9     | 10   | 3    | 0     | 1     | 0     | 2     | 0     | Weak start, Attack health, Max count 1 |
 | | **Flying** |
 | 0 | Bat            | 5     | 2    | 8    | 0     | 0     | 0     | 4     | 0     | Max count 1 |

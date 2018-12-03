@@ -127,7 +127,7 @@ class Unit {
     var dist = target.tile.position.distance(from.position);
     return stats.RNG + stats.VIS >= dist - target.stats.STL
       && stats.RNG >= dist
-      && stats.ATK > 0
+      && baseAttack() > 0
       && target.owner != null
       && target.owner != owner
       && (attack ? true : !stats.siege)
@@ -147,15 +147,19 @@ class Unit {
       && target.owner != owner;
   }
   
+  public function baseAttack():Int {
+    var dmg = stats.ATK;
+    if (stats.charge) dmg += startingTile.position.distance(tile.position);
+    if (stats.healthATK) dmg += stats.HP;
+    return dmg;
+  }
+  
   public function damageTo(target:Unit, attacking:Bool):Int {
     return 0.maxI(if (attacking) {
-        var dmg = stats.ATK - target.stats.DEF;
-        if (stats.charge) dmg += startingTile.position.distance(tile.position);
-        if (stats.healthATK) dmg += stats.HP;
-        dmg;
+        baseAttack() - target.stats.DEF;
       } else {
         if (stats.siege) 0;
-        else stats.ATK - target.stats.DEF;
+        else baseAttack() - target.stats.DEF;
       });
   }
   

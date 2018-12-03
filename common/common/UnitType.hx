@@ -74,7 +74,7 @@ class UnitTypeTools {
       */
        Wolf          => {CYC: 4 , HP: 2 , MP: 3, ATK: 3, RNG: 1, DEF: 0, VIS: 3, STL: 0, capture: true, tier: 0}
       ,Bull          => {CYC: 10, HP: 6 , MP: 3, ATK: 2, RNG: 1, DEF: 1, VIS: 2, STL: 0, charge: true, tier: 3}
-      ,Chamois       => {CYC: 10, HP: 6 , MP: 3, ATK: 0, RNG: 1, DEF: 1, VIS: 2, STL: 0, charge: true, affinity: [TTMountain, TTHill], tier: 3}
+      ,Chamois       => {CYC: 6,  HP: 4 , MP: 4, ATK: 1, RNG: 1, DEF: 0, VIS: 2, STL: 0, charge: true, affinity: [TTMountain, TTHill], tier: 2}
       ,Spider        => {CYC: 4 , HP: 2 , MP: 4, ATK: 1, RNG: 1, DEF: 0, VIS: 3, STL: 1, affinity: [TTDesert], capture: true, tier: 1}
       ,BombardierAnt => {CYC: 6 , HP: 3 , MP: 2, ATK: 2, RNG: 4, DEF: 0, VIS: 1, STL: 0, siege: true, tier: 2}
       ,Hog           => {CYC: 9 , HP: 10, MP: 3, ATK: 0, RNG: 1, DEF: 0, VIS: 2, STL: 0, weakStart: true, healthATK: true, tier: 4, maxCount: 1}

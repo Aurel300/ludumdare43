@@ -6,6 +6,27 @@ class UI {
   static final REPAIR_TIME = 30;
   static final CAPTURE_TIME = 60;
   
+  static var TOOLTIP:Array<{bg:Bitmap, i:Int, has:Unit->Bool, name:String, t:String}> = [
+       {bg: null, i: 0, has: u -> u.stats.affinity.indexOf(Terrain.TTHill) != -1, name: "Mountain/Hill affinity", t: "No slowdown on mountains or hills."}
+      ,{bg: null, i: 1, has: u -> u.stats.affinity.indexOf(Terrain.TTDesert) != -1, name: "Desert affinity", t: "No slowdown in desert."}
+      ,{bg: null, i: 2, has: u -> u.stats.repair, name: "Repair", t: "Can repair friendly units, restoring 2HP per turn."}
+      ,{bg: null, i: 3, has: u -> u.stats.camouflage, name: "Camouflage", t: "STL increased by remaining MOV at the end of turn."}
+      ,{bg: null, i: 4, has: u -> u.stats.charge, name: "Charge", t: "ATK increased by 1 for each hex tile away from start."}
+      ,{bg: null, i: 5, has: u -> u.stats.siege, name: "Siege", t: "Can only attack when MOV is full. Cannot counter-strike."}
+      ,{bg: null, i: 6, has: u -> u.stats.healthATK, name: "Health attack", t: "ATK increased by current HP."}
+      ,{bg: null, i: 7, has: u -> u.stats.kamikaze, name: "Kamikaze", t: "Attacking destroys self."}
+      ,{bg: null, i: 8, has: u -> u.stats.medusaGaze, name: "Medusa gaze", t: "Any attacked unit instantly turns neutral."}
+    ];
+  
+  public static function load():Void {
+    for (t in TOOLTIP) {
+      var b = Platform.createBitmap(150, 70 + 48, 0);
+      Text.render(b, 4, 44, '${Text.t(t.i < 4 ? RegularGreen : RegularRed)}${t.name}${Text.t(Regular)}');
+      b.blitAlpha(Text.justify(t.t, 150 - 8, Regular, 12), 4, 44 + 16);
+      t.bg = b;
+    }
+  }
+  
   public var mapRenderer:MapRenderer;
   public var localController:PCLocal;
   public var gameController:GameController;
@@ -28,14 +49,22 @@ class UI {
       ,confirmAction: null
       ,cancelAction: UISelection.None
       ,highlightTimer: 0
-      ,bg: null
+      ,bg: (null:Bitmap)
     };
   public var mouseAction:UIAction = None;
+  public var stats = {
+       show: new Bitween(30, false)
+      ,y: 300
+      ,gfx: (null:Bitmap)
+      ,bg: (null:Bitmap)
+      ,tooltips: ([]:Array<Tooltip>)
+    };
   
   public var handlingUpdate:Null<GameUpdate> = null;
   public var handlingTimer:Int = 0;
   
   public function new(mapRenderer:MapRenderer, localController:PCLocal, gameController:GameController) {
+    stats.bg = Platform.createBitmap(150, 70 + 48, 0);
     this.mapRenderer = mapRenderer;
     this.localController = localController;
     this.gameController = gameController;
@@ -101,10 +130,15 @@ class UI {
         mapRenderer.captureBar.capture = capture;
       }
       handlingTimer++; break;
-      case CapturingBuilding(_, _, _, _) | CaptureBuilding(_, _, _): mapRenderer.captureBar.show.setTo(false); done();
+      case CapturingBuilding(_, _, _, _) | CaptureBuilding(_, _, _):
+      deselect();
+      mapRenderer.captureBar.show.setTo(false); done();
       case RepairUnit(u, du, _) | AttackUnit(u, du, _, _):
+      selectTile(u.tile);
       u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; du.actionRelevant = false; done();
-      case MoveUnit(u, _, _, _): u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
+      case MoveUnit(u, _, _, _):
+      selectTile(u.tile);
+      u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
       case _: done();
     }
     
@@ -122,9 +156,21 @@ class UI {
     modal.h = (modal.targetH * Timing.quartOut(modal.show.valueF)).round();
     modal.x = (tp.x - (modal.w >> 2)).clampI(0, 500 - modal.w);
     modal.y = (tp.y).clampI(0, 300 - modal.h);
+    
+    stats.show.tick();
   }
   
   public function render(to:Bitmap, mx:Int, my:Int):Void {
+    // stats
+    if (!stats.show.isOff) {
+      stats.y = 300 - Timing.quartInOut.getI(stats.show.valueF, stats.gfx.height);
+      to.blitAlpha(stats.gfx, 0, stats.y);
+      switch (mouseAction) {
+        case StatsTooltip(i): to.blitAlpha(TOOLTIP[i].bg, 0, stats.y - 32);
+        case _: to.blitAlpha(stats.bg, 0, stats.y - 32);
+      }
+    }
+    
     // show modal
     if (!modal.show.isOff) {
       GSGame.makeUIBox(to, modal.x, modal.y, modal.w, modal.h);
@@ -172,16 +218,7 @@ class UI {
     }
     
     // render
-    var selText = (switch (selection) {
-        case STileBase(t, ts, i): switch (ts[i]) {
-          case STile(tt): "tile";
-          case SUnit(u): "unit";
-          case SBuilding(b): "building";
-          case _: "?";
-        }
-        case _: "nothing";
-      });
-    Text.render(to, 8, 300 - 16, 'turn: ${localController.activePlayer.name}, selected: $selText');
+    Text.render(to, 158, 300 - 16, 'turn: ${localController.activePlayer.name}');
   }
   
   function deselect():Void {
@@ -211,19 +248,71 @@ class UI {
   function updateRange():Void {
     if (localController.activePlayer != null) mapRenderer.rangeColour = localController.activePlayer.colourIndex;
     mapRenderer.actions = [];
+    stats.show.setTo(false);
     switch (selection) {
-      case STileBase(t, ts, i): switch (ts[i]) {
-        case STile(_): mapRenderer.range = [t];
+      case STileBase(t, ts, i):
+      stats.gfx = GSGame.B_STATS[ts.length - 1][i];
+      stats.bg.fill(0);
+      for (j in 0...ts.length) {
+        switch (ts[j]) {
+          case STile(t): stats.bg.blitAlphaRect(t.tileBitmap(), j * 24, 26 + (j == i ? 1 : 3), 0, 0, 24, j == i ? 18 : 12);
+          case SUnit(u): stats.bg.blitAlphaRect(u.unitBitmap(), j * 24 - 4, 18 + (j == i ? 1 : 3), 0, 0, 32, j == i ? 24 : 20);
+          case SBuilding(b): stats.bg.blitAlphaRect(b.buildingBitmap(), j * 24 - 4, 10 + (j == i ? 1 : 3), 0, 0, 32, j == i ? 32 : 28);
+          case _:
+        }
+      }
+      stats.show.setTo(true);
+      stats.tooltips = [];
+      mapRenderer.range = [t];
+      var text = (switch (ts[i]) {
+        case STile(_):
+        Text.render(stats.bg, stats.bg.width - 30, 44, "(TILE)", SmallYellow);
+        function showInfInt(t:InfInt):String return (switch (t) {
+            case Num(n): '$n';
+            case Inf: "N/A";
+          });
+        '${t.name}'
+        + '\n${Text.t(Small)}MOV cost:'
+        + '\n${Text.t(Small)}  ${Text.t(Regular)}${showInfInt(t.terrain.tdfG())} (ground)'
+        + '\n${Text.t(Small)}  ${Text.t(Regular)}${showInfInt(t.terrain.tdfF())} (flying)'
+        + '\n${Text.t(Small)}  ${Text.t(Regular)}${showInfInt(t.terrain.tdfS())} (swimming)';
         case SUnit(u):
+        Text.render(stats.bg, stats.bg.width - 30, 44, "(UNIT)", SmallYellow);
         if (u.owner == localController.activePlayer) {
           mapRenderer.range = u.accessibleTiles;
           mapRenderer.actions = u.accessibleActions;
-        } else {
-          mapRenderer.range = [t];
         }
-        case SBuilding(b): mapRenderer.range = [t];
-        case _:
-      }
+        var cx = stats.bg.width - 4 - 24;
+        var cy = stats.bg.height - 4 - 24 - 7;
+        for (tt in TOOLTIP) {
+          if (!tt.has(u)) continue;
+          stats.bg.blitAlpha(GSGame.B_PERK[tt.i], cx, cy);
+          stats.tooltips.push({
+               x: cx
+              ,y: cy
+              ,w: 24
+              ,h: 24
+              ,i: tt.i
+            });
+          cx -= 24;
+        }
+        var ATK = u.baseAttack();
+        '${Text.tp(u.owner)}${u.name} ${Text.t(Small)}(${Text.tp(u.owner, false)}${u.owner == null ? "NEUTRAL" : u.owner.name}${Text.t(Small)})${Text.t(Regular)}'
+        + '\n${Text.t(Small)} HP: ${Text.t(Regular)}${u.stats.HP}${Text.t(Small)}/${u.stats.maxHP}'
+        + '\n${Text.t(Small)}MOV: ${Text.t(Regular)}${u.stats.MP}${Text.t(Small)}/${u.stats.maxMP}'
+        + '\n${Text.t(Small)}ATK: ${Text.t(Regular)}${ATK}${Text.t(Small)}'
+          + (u.stats.ATK == ATK
+            ? ""
+            : ' ${Text.t(SmallYellow)}(${u.stats.ATK}${ATK > u.stats.ATK ? "+" : "-"}${(ATK - u.stats.ATK).absI()})')
+        + '\n${Text.t(Small)}RNG: ${Text.t(Regular)}${u.stats.RNG}${Text.t(Small)}'
+        + '\n${Text.t(Small)}DEF: ${Text.t(Regular)}${u.stats.DEF}${Text.t(Small)}';
+        case SBuilding(b):
+        Text.render(stats.bg, stats.bg.width - 46, 44, "(BUILDING)", SmallYellow);
+        '${Text.tp(b.owner)}${b.name} ${Text.t(Small)}(${Text.tp(b.owner, false)}${b.owner == null ? "NEUTRAL" : b.owner.name}${Text.t(Small)})${Text.t(Regular)}'
+        ;
+        case _: "";
+      });
+      Text.render(stats.bg, 4, 44, text);
       case None: mapRenderer.range = [];
       case _:
     }
@@ -231,7 +320,9 @@ class UI {
   
   function selectTile(sel:Tile):Void {
     // update selection
-    function freshTile() return STileBase(sel, sel.units.map(SUnit).concat(sel.buildings.map(SBuilding)).concat([STile(sel)]), 0);
+    function freshTile() {
+      return STileBase(sel, sel.units.map(SUnit).concat(sel.buildings.length > 0 ? sel.buildings.map(SBuilding) : [STile(sel)]), 0);
+    }
     selection = (switch (selection) {
         case STileBase(prev, ts, i):
         if (prev == sel) {
@@ -276,19 +367,19 @@ class UI {
               var attack = unit.summariseAttack(u);
               'Attack ${Text.tp(u.owner)}${u.name}${Text.t(Regular)}'
               + (attack.willStrike
-                ? '\n${Text.t(Small)}STRIKE'
+                ? '\n${Text.t(SmallYellow)}STRIKE'
                   + '\n${Text.t(Regular)} DMG: ${attack.dmgA}' + (attack.killD ? ' ${Text.t(SmallRed)}LETHAL' : "")
                 : '')
               + (attack.willCounter
-                ? '\n${Text.t(Small)}COUNTER-STRIKE'
+                ? '\n${Text.t(SmallYellow)}COUNTER-STRIKE'
                   + '\n${Text.t(Regular)} DMG: ${attack.dmgD}' + (attack.killA ? ' ${Text.t(SmallRed)}LETHAL' : "")
-                : '\n${Text.t(Small)}NO COUNTER-STRIKE'
+                : '\n${Text.t(SmallYellow)}NO COUNTER-STRIKE'
                   + (attack.killD ? '\n${Text.t(Regular)} ${Text.t(SmallYellow)}(Unit destroyed)' : "")
                 );
               case AttackNoDamage(u):
               confirmAction = null;
               'Attack ${Text.tp(u.owner)}${u.name}${Text.t(Regular)}'
-              + '\n${Text.t(Small)}STRIKE'
+              + '\n${Text.t(SmallYellow)}STRIKE'
               + '\n${Text.t(Regular)} DMG: ${Text.t(SmallRed)}0';
               case Repair(u):
               var repair = unit.summariseRepair(u);
@@ -324,6 +415,8 @@ class UI {
         case _: selectTile(target);
       }
       case [_, SelectTile(t)]: selectTile(t);
+      case [_, Stats]: return true;
+      case [_, StatsTooltip(_)]: return true;
       case [_, None]: return false;
     }
     return true;
@@ -347,11 +440,20 @@ class UI {
       return true;
     }
     
-    // TODO: handle overlays ...
+    if (mx.withinI(0, stats.bg.width - 1) && my.withinI(stats.y, 300)) {
+      mouseAction = Stats;
+      for (t in stats.tooltips) {
+        if (mx.withinI(t.x, t.x + t.w - 1) && my.withinI(stats.y - 32 + t.y, stats.y - 32 + t.y + t.h - 1)) {
+          mouseAction = StatsTooltip(t.i);
+          return true;
+        }
+      }
+      return true;
+    }
     
     // map interaction
     var tile = mapRenderer.mouseToTile(mx, my);
-    if (tile == null) return false;
+    if (tile == null || tile.terrain == TTNone) return false;
     mouseAction = SelectTile(tile);
     return true;
   }
@@ -375,6 +477,8 @@ enum UIAction {
   SelectTile(t:Tile);
   CancelModal;
   ConfirmModal;
+  Stats;
+  StatsTooltip(i:Int);
 }
 
 enum UISelection {
@@ -389,3 +493,11 @@ enum ModalTarget {
   MTPosition(x:Int, y:Int);
   MTTile(t:Tile);
 }
+
+typedef Tooltip = {
+     x:Int
+    ,y:Int
+    ,w:Int
+    ,h:Int
+    ,i:Int
+  };

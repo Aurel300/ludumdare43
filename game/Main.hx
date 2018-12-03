@@ -28,6 +28,7 @@ class Main extends Application {
               consoleFont = Text.fonts[0];
               false;
             })
+            ,new AssetBind(["text"], (_, _) -> { UI.load(); false; })
           ])
         ,Keyboard
         ,Mouse

@@ -36,7 +36,6 @@ class Text {
   }
   
   public static inline function tp(of:Player, ?regular:Bool):String {
-    trace(of.playerColour());
     return t((cast (regular == null || regular ? FontType.Regular : FontType.Small):Int) + of.playerColour());
   }
   /*
