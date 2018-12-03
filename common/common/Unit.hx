@@ -46,25 +46,7 @@ class Unit {
   }
   
   public var name(get, never):String;
-  private function get_name():String return switch (type) {
-      case Wolf: "Wolf";
-      case Bull: "Bull";
-      case Chamois: "Chamois";
-      case Spider: "Spider";
-      case BombardierAnt: "Bombardier Ant";
-      case Hog: "Hog";
-      case Monkey: "Monkey";
-      case Bumblebee: "Bumblebee";
-      case Mosquito: "Mosquito";
-      case Bat: "Bat";
-      case Eagle: "Eagle";
-      case Squid: "Squid";
-      case Octopus: "Octopus";
-      case Swordfish: "Swordfish";
-      case Frog: "Frog";
-      case Snake: "Snake";
-      case Medusa: "Medusa";
-    };
+  private function get_name():String return type.name();
   
   public function new(type:UnitType, tile:Tile, owner:Player) {
     this.type = type;
@@ -78,15 +60,24 @@ class Unit {
   public function summariseAttack(target:Unit) {
     var dmgA = damageTo(target, true);
     var willStrike = true;
+    var willTurn = stats.medusaGaze;
     var killD = false;
-    var dmgD = target.damageTo(this, false);
+    var dmgD = 0;
     var willCounter = false;
     var killA = false;
+    var willSuicide = false;
+    
+    if (willTurn) dmgA = 0;
+    if (stats.kamikaze) {
+      killA = true;
+      willSuicide = true;
+    }
     
     if (target.stats.HP - dmgA <= 0) {
       killD = true;
-    } else if (dmgD > 0 && target.canAttack(this, false)) {
+    } else if (!willTurn && dmgD > 0 && target.canAttack(this, false)) {
       willCounter = true;
+      dmgD = target.damageTo(this, false);
       if (stats.HP - dmgD <= 0) {
         killA = true;
       }
@@ -94,11 +85,13 @@ class Unit {
     
     return {
          dmgA: dmgA
+        ,willTurn: willTurn
         ,willStrike: willStrike
         ,killD: killD
-        ,dmgD: willCounter ? dmgD : 0
+        ,dmgD: dmgD
         ,willCounter: willCounter
         ,killA: killA
+        ,willSuicide: willSuicide
       };
   }
   
@@ -130,7 +123,7 @@ class Unit {
       && baseAttack() > 0
       && target.owner != null
       && target.owner != owner
-      && (attack ? true : !stats.siege)
+      && (stats.siege ? ((attack && stats.MP == stats.maxMP) || !attack) : true)
       && (attack ? true : !stats.defended);
   }
   
@@ -148,24 +141,43 @@ class Unit {
   }
   
   public function baseAttack():Int {
-    var dmg = stats.ATK;
-    if (stats.charge) dmg += startingTile.position.distance(tile.position);
-    if (stats.healthATK) dmg += stats.HP;
-    return dmg;
+    var atk = stats.ATK;
+    if (stats.charge) atk += startingTile.position.distance(tile.position);
+    if (stats.healthATK) atk += stats.HP;
+    if (tile.buildings.length > 0
+      && tile.buildings[0].type == BTFortress
+      && tile.buildings[0].owner == owner) atk += 1;
+    return atk;
+  }
+  
+  public function baseDefense():Int {
+    var def = stats.DEF;
+    if (tile.buildings.length > 0
+      && tile.buildings[0].type == BTFortress
+      && tile.buildings[0].owner == owner) def += 1;
+    return def;
+  }
+  
+  public function baseVisibility():Int {
+    var vis = stats.VIS;
+    if (tile.buildings.length > 0
+      && tile.buildings[0].type == BTFortress
+      && tile.buildings[0].owner == owner) vis += 1;
+    return vis;
   }
   
   public function damageTo(target:Unit, attacking:Bool):Int {
     return 0.maxI(if (attacking) {
-        baseAttack() - target.stats.DEF;
+        baseAttack() - target.baseDefense();
       } else {
         if (stats.siege) 0;
-        else baseAttack() - target.stats.DEF;
+        else baseAttack() - target.baseDefense();
       });
   }
   
   public function cost(from:Tile, to:Tile):InfInt {
-    var fromTDF = from.terrain.tdf(type.category());
-    var toTDF = to.terrain.tdf(type.category());
+    var fromTDF = from.tdf(this); // from.terrain.tdf(type.category());
+    var toTDF = to.tdf(this); // to.terrain.tdf(type.category());
     if (stats.affinity.indexOf(from.terrain) != -1) fromTDF = Num(1);
     if (stats.affinity.indexOf(to.terrain) != -1) toTDF = Num(1);
     return to.units.filter(u -> u.owner != owner).length > 0 ? Inf : fromTDF.max(toTDF);

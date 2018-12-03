@@ -35,4 +35,19 @@ class Building {
     this.tile = tile;
     this.owner = owner;
   }
+  
+  public function summariseBuild(of:UnitType) {
+    var stats = of.stats(null);
+    var suffCost = owner.cycles >= stats.CYC;
+    var suffTier = owner.tier >= stats.tier;
+    var space = tile.units.length == 0;
+    
+    return {
+         canBuild: suffCost && suffTier && space
+        ,suffCost: suffCost
+        ,suffTier: suffTier
+        ,space: space
+        ,cost: stats.CYC
+      };
+  }
 }

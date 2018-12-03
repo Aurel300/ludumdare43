@@ -45,4 +45,14 @@ class Tile {
     this.position = position;
     this.map = map;
   }
+  
+  public function tdf(u:Unit):InfInt {
+    var tdf = terrain.tdf(u.type.category());
+    if (u.stats.affinity.indexOf(terrain) != -1) tdf = Num(1);
+    if (u.type.category() == Swimming
+      && buildings.length > 0
+      && buildings[0].type == BTDock
+      && buildings[0].owner == u.owner) tdf = Num(1);
+    return tdf;
+  }
 }

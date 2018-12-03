@@ -35,6 +35,7 @@ class GCLocal implements GameController {
         var attack = u.summariseAttack(target);
         if (attack.willStrike) queuedUpdates.push(AttackUnit(u, target, attack.dmgA, true));
         if (attack.killD) queuedUpdates.push(RemoveUnit(target));
+        if (attack.willTurn) queuedUpdates.push(TurnUnit(target));
         if (attack.willCounter) queuedUpdates.push(AttackUnit(target, u, attack.dmgD, false));
         if (attack.killA) queuedUpdates.push(RemoveUnit(u));
         case Repair(target):
@@ -47,6 +48,10 @@ class GCLocal implements GameController {
         case AttackNoDamage(_):
       }
     }
+    function handleBuild(ut:UnitType, at:Building):Void {
+      var build = at.summariseBuild(ut);
+      queuedUpdates.push(BuildUnit(ut, at, build.cost));
+    }
     var stop = false;
     while (!stop) g.state = (switch (g.state) {
         case Starting(0): StartingTurn(g.players[0]);
@@ -54,13 +59,21 @@ class GCLocal implements GameController {
         case StartingTurn(p):
         p.controller.beginTurn(p);
         // TODO: synchronise state if network
+        p.tier = 0;
         for (tile in g.map.tiles) {
+          for (building in tile.buildings) {
+            if (building.owner != p) continue;
+            switch (building.type) {
+              case BTTempleTron | BTShrine: p.cycles += 7;
+              case BTForge: p.tier++;
+              case _:
+            }
+          }
           for (unit in tile.units) {
             if (unit.owner != p) continue;
             unit.startingTile = tile;
             unit.stats.moved = false;
             unit.stats.acted = false;
-            unit.stats.defended = false;
             unit.stats.MP = unit.stats.maxMP;
           }
         }
@@ -71,11 +84,18 @@ class GCLocal implements GameController {
           case Wait: stop = true;
           case MoveUnit(u, to): handleMoveUnit(u, to);
           case UnitAction(u, action): handleUnitAction(u, action);
+          case Build(ut, at): handleBuild(ut, at);
           case EndTurn: g.state = FinishingTurn(p); continue;
         }
         PlayerTurn(p, t - 1);
         case FinishingTurn(p):
         p.controller.endTurn(p);
+        for (tile in g.map.tiles) {
+          for (unit in tile.units) {
+            if (unit.owner != p) continue;
+            unit.stats.defended = false;
+          }
+        }
         // TODO: check victory
         
         // TODO: synchronise state if network
@@ -101,11 +121,21 @@ class GCLocal implements GameController {
       u.tile.units.remove(u);
       case RepairUnit(_, target, rep):
       target.stats.HP += rep;
+      case TurnUnit(u):
+      u.owner = null;
       case CaptureBuilding(u, b, _):
       u.stats.captureTimer = 0;
       b.owner = (b.owner == null ? u.owner : null);
       case CapturingBuilding(u, b, _, prog):
       u.stats.captureTimer = prog;
+      case BuildUnit(ut, at, cost):
+      var u = new Unit(ut, at.tile, at.owner);
+      at.tile.units.push(u);
+      if (ut == Hog) u.stats.HP = 1;
+      u.stats.MP = 0;
+      u.stats.moved = true;
+      u.stats.acted = true;
+      at.owner.cycles -= cost;
     }
     return update;
   }

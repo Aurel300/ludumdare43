@@ -45,6 +45,26 @@ typedef UnitStatsProto = {
   };
 
 class UnitTypeTools {
+  public static function name(of:UnitType):String return switch (of) {
+      case Wolf: "Wolf";
+      case Bull: "Bull";
+      case Chamois: "Chamois";
+      case Spider: "Spider";
+      case BombardierAnt: "BombardierAnt";
+      case Hog: "Hog";
+      case Monkey: "Monkey";
+      case Bumblebee: "Bumblebee";
+      case Mosquito: "Mosquito";
+      case Bat: "Bat";
+      case Eagle: "Eagle";
+      case Squid: "Squid";
+      case Octopus: "Octopus";
+      case Swordfish: "Swordfish";
+      case Frog: "Frog";
+      case Snake: "Snake";
+      case Medusa: "Medusa";
+    };
+  
   public static inline function category(of:UnitType):UnitCategory return switch (of) {
       case Bumblebee | Mosquito | Bat | Eagle: Flying;
       case Squid | Octopus | Swordfish: Swimming;
@@ -52,7 +72,7 @@ class UnitTypeTools {
       case _: Ground;
     };
   
-  static var TYPE_STATS:haxe.ds.Map<UnitType, UnitStatsProto> = [
+  public static var TYPE_STATS:haxe.ds.Map<UnitType, UnitStatsProto> = [
       /*
        Wolf          => {CYC: 4 , HP: 2 , MP: 3, ATK: 3, RNG: 1, DEF: 0, VIS: 3, STL: 0}
       ,Bull          => {CYC: 6 , HP: 5 , MP: 3, ATK: 2, RNG: 1, DEF: 1, VIS: 2, STL: 0, charge: true}
@@ -108,7 +128,6 @@ class UnitTypeTools {
         ,DEF: stats.DEF
         ,VIS: stats.VIS
         ,STL: stats.STL
-        ,SLW: 0
         ,tier: stats.tier
         ,capture: db(stats.capture)
         ,maxCount: stats.maxCount != null ? stats.maxCount : -1

@@ -8,6 +8,7 @@ class Player {
   public var faction:Faction;
   public var controller:PlayerController;
   public var cycles:Int;
+  public var tier:Int = 0;
   
   public function new(name:String, faction:Faction, controller:PlayerController) {
     this.name = name;

@@ -16,6 +16,7 @@ class TerrainTools {
       case Ground: tdfG(of);
       case Flying: tdfF(of);
       case Swimming: tdfS(of);
+      case Amphibian: tdfA(of);
       case _: Inf;
     };
   
@@ -34,6 +35,15 @@ class TerrainTools {
     };
   
   public static function tdfS(of:Terrain):InfInt return switch (of) {
+      case TTWater: Num(1);
+      case _: Inf;
+    };
+  
+  public static function tdfA(of:Terrain):InfInt return switch (of) {
+      case TTPlain: Num(1);
+      case TTDesert: Num(2);
+      case TTHill: Num(2);
+      case TTMountain: Num(3);
       case TTWater: Num(1);
       case _: Inf;
     };

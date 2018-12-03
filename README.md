@@ -239,23 +239,17 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
 
 ## TODO ##
 
- - QA
+ - sacrifices
+ - larger tiles (outline against same colour???)
+ - neutral units captured
+ - main menu
+ - MP
+ - QA / QoL
    - RMB - cancel turn
    - HP bars - toggle with button
    - moved / acted indicator
-   - neutral units - capture?
- - model / view architecture
-   - model - game, map, units, etc, with no link to the view
-     - easily extendable to AIs, local MP or even MP-over-server
-   - view - animations, sprites, visual effects ...
  - model
-   - AI
-   - balancing
-     - unit types, stats
-     - QA
-     - AI simulation?
- - view
-   . highlight tiles, units
-   . display possible actions for units
-     - visualise terrain difficulty
-   - **UI**
+   - AI?
+ - audio
+   - add music
+   . create sfx

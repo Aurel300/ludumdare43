@@ -11,21 +11,20 @@ typedef UnitStats = {
     ,DEF:Int
     ,VIS:Int
     ,STL:Int
-    ,SLW:Int
     ,moved:Bool
     ,acted:Bool
     ,defended:Bool
     ,captureTimer:Int
-    ,tier:Int
-    ,capture:Bool
-    ,maxCount:Int
+    ,tier:Int //
+    ,capture:Bool // units
+    ,maxCount:Int //
     ,charge:Bool
     ,repair:Bool
     ,affinity:Array<Terrain>
-    ,weakStart:Bool
+    ,weakStart:Bool //
     ,healthATK:Bool
     ,kamikaze:Bool
     ,siege:Bool
-    ,camouflage:Bool
+    ,camouflage:Bool //
     ,medusaGaze:Bool
   };

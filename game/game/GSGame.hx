@@ -2,6 +2,8 @@ package game;
 
 class GSGame extends JamState {
   public static var I:GSGame;
+  public static var musicOn = true;
+  public static var soundOn = true;
   
   public static var B_GAME:FluentBitmap;
   public static var B_PAL:Vector<Colour>;
@@ -19,6 +21,8 @@ class GSGame extends JamState {
   public static var B_CAPTURE:Vector<FluentBitmap>; // capture, raze
   public static var B_STATS:Vector<Vector<FluentBitmap>>; // tab count, active tab
   public static var B_PERK:Vector<FluentBitmap>;
+  public static var B_STATS_BUTTON:Vector<FluentBitmap>;
+  public static var B_STATS_ICONS:Vector<FluentBitmap>;
   
   public static var RANGE_BORDERS_X = [0,  5,  17, 17, 5,  0];
   public static var RANGE_BORDERS_W = [6,  12, 6,  6,  12, 6];
@@ -58,7 +62,6 @@ class GSGame extends JamState {
     B_UNITS = Vector.fromArrayCopy([ for (i in 0...(cast UnitType.Medusa:Int) + 1)
         Vector.fromArrayCopy([ for (player in 0...5)
             recolour(B_GAME >> new Cut(0, 80 + i * 24, 32, 24), player)
-            //B_GAME >> new Cut(0, 80 + i * 24, 32, 24) << new GlowBox(c)
           ])
       ]);
     B_RANGE_BORDERS = Vector.fromArrayCopy([ for (i in 0...4)
@@ -104,11 +107,17 @@ class GSGame extends JamState {
             b;
           } ])
       ]);
-    B_PERK = Vector.fromArrayCopy([ for (i in 0...4)
+    B_PERK = Vector.fromArrayCopy([ for (i in 0...7)
         B_GAME >> new Cut(240 + i * 24, 144, 24, 24)
       ].concat([ for (i in 0...5)
         B_GAME >> new Cut(240 + i * 24, 168, 24, 24)
       ]));
+    B_STATS_BUTTON = Vector.fromArrayCopy([ for (i in 0...3)
+        B_GAME >> new Cut(216 + i * 24, 192, 24, 24)
+      ]);
+    B_STATS_ICONS = Vector.fromArrayCopy([ for (i in 0...5)
+        B_GAME >> new Cut(216 + i * 24, 216, 24, 24)
+      ]);
   }
   
   public static function makeUIBox(to:Bitmap, x:Int, y:Int, w:Int, h:Int):Void {
