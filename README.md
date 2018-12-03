@@ -60,22 +60,22 @@ Special attributes:
 
 | Tier | Type           | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
 | ---- | -------------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
-| **Ground** |
+| | **Ground** |
 | 0 | Wolf           | 4     | 2    | 3    | 3     | 1     | 0     | 3     | 0     | Capturing |
+| 1 | Spider         | 4     | 2    | 4    | 1     | 1     | 0     | 3     | 1     | Capturing, Desert affinity |
+| 1 | Monkey         | 4     | 1    | 2    | 0     | 0     | 2     | 1     | 0     | Capturing, Repair, Mountain affinity, Hill affinity, Max count 2 |
+| 2 | Bombardier ant | 6     | 3    | 2    | 2     | 4     | 0     | 1     | 0     | Siege |
 | 3 | Bull           | 10    | 6    | 3    | 2     | 1     | 1     | 2     | 0     | Charge |
 | 3 | Chamois        | 10    | 6    | 3    | 0     | 1     | 1     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
-| 1 | Spider         | 4     | 2    | 4    | 1     | 1     | 0     | 3     | 1     | Capturing, Desert affinity |
-| 2 | Bombardier ant | 6     | 3    | 2    | 2     | 4     | 0     | 1     | 0     | Siege |
 | 4 | Hog            | 9     | 10   | 3    | 0     | 1     | 0     | 2     | 0     | Weak start, Attack health, Max count 1 |
-| 1 | Monkey         | 4     | 1    | 2    | 0     | 0     | 2     | 1     | 0     | Capturing, Repair, Mountain affinity, Hill affinity, Max count 2 |
 | | **Flying** |
+| 0 | Bat            | 5     | 2    | 8    | 0     | 0     | 0     | 4     | 0     | Max count 1 |
 | 2 | Bumblebee      | 4     | 1    | 5    | 6     | 1     | 0     | 1     | 0     | Kamikaze, Siege |
 | 2 | Mosquito       | 5     | 2    | 3    | 3     | 1     | 0     | 3     | 1     | - |
-| 0 | Bat            | 5     | 2    | 8    | 0     | 0     | 0     | 4     | 0     | Max count 1 |
 | 4 | Eagle          | 10    | 5    | 3    | 3     | 1     | 1     | 4     | 0     | - |
 | | **Swimming** |
-| 2 | Squid          | 10    | 2    | 3    | 4     | 4     | 2     | 1     | 0     | Siege, Max count 2 |
 | 1 | Octopus        | 6     | 4    | 3    | 4     | 1     | 0     | 3     | 1     | - |
+| 2 | Squid          | 10    | 2    | 3    | 4     | 4     | 2     | 1     | 0     | Siege, Max count 2 |
 | 3 | Swordfish      | 9     | 4    | 6    | 0     | 1     | 1     | 2     | 1     | Charge, Max count 1 |
 | | **Amphibian** |
 | 1 | Frog           | 2     | 1    | 1    | 0     | 0     | 3     | 1     | 0     | - |
