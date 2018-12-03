@@ -35,6 +35,13 @@ class Unit {
     if (tile.buildings.length > 0 && tile.buildings[0].owner != owner) {
       ret.push(Capture(tile.buildings[0]));
     }
+    if (stats.repair) {
+      ret = ret.concat(
+          tile.neighbours
+            .filter(t -> t.units.length != 0 && t.units[0].owner == owner && t.units[0].stats.HP < t.units[0].stats.maxHP)
+            .map(t -> UnitAction.Repair(t.units[0]))
+        );
+    }
     return ret;
   }
   

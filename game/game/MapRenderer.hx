@@ -11,8 +11,9 @@ class MapRenderer {
   public var rangeColour:Int = 0;
   public var hpBarShow = new Bitween(15, true);
   
-  var camXI:Int = 50;
-  var camYI:Int = 50;
+  public var camXI:Int = 50;
+  public var camYI:Int = 100;
+  
   var rangeT:Int = 0;
   var map:Map;
   var prevAngle:Int = 0;

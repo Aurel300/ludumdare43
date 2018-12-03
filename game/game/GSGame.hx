@@ -13,6 +13,9 @@ class GSGame extends JamState {
   public static var B_RANGE_BORDERS:Vector<Vector<Vector<FluentBitmap>>>; // phase, bit, player
   public static var B_ACTIONS:Vector<FluentBitmap>; // action
   public static var B_HP_BAR:Vector<FluentBitmap>; // 0,1 = small, 2,3,4 = full
+  public static var B_UI_BOX:FluentBitmap;
+  public static var B_UI_BOX_CONFIRM:Vector<FluentBitmap>; // normal, held
+  public static var BM_BOX:Box;
   
   public static var RANGE_BORDERS_X = [0,  5,  17, 17, 5,  0];
   public static var RANGE_BORDERS_W = [6,  12, 6,  6,  12, 6];
@@ -72,6 +75,20 @@ class GSGame extends JamState {
       ].concat([ for (i in 0...3)
         B_GAME >> new Cut(216 + i * 8, 8, 5, 12)
       ]));
+    B_UI_BOX = B_GAME >> new Cut(216, 24, 24, 24);
+    BM_BOX = new Box(new sk.thenet.geom.Point2DI(8, 8), new sk.thenet.geom.Point2DI(16, 16), 0, 0);
+    B_UI_BOX_CONFIRM = Vector.fromArrayCopy([ for (i in 0...2)
+        B_GAME >> new Cut(216 + i * 16, 48, 16, 24)
+      ].concat([ for (i in 0...5)
+        B_GAME >> new Cut(216 + i * 16, 72, 16, 24)
+      ]));
+  }
+  
+  public static function makeUIBox(to:Bitmap, x:Int, y:Int, w:Int, h:Int):Void {
+    if (w <= 0 || h <= 0) return;
+    BM_BOX.width = w;
+    BM_BOX.height = h;
+    to.blit(B_UI_BOX >> BM_BOX, x, y);
   }
   
   var mapRenderer:MapRenderer;
@@ -102,8 +119,8 @@ class GSGame extends JamState {
   
   override public function tick():Void {
     // controls
-    mapRenderer.camX -= 3.negposF(ak(KeyA), ak(KeyD));
-    mapRenderer.camY -= 3.negposF(ak(KeyW), ak(KeyS));
+    mapRenderer.camX -= 3.negposF(ak(KeyA) || ak(ArrowLeft), ak(KeyD) || ak(ArrowRight));
+    mapRenderer.camY -= 3.negposF(ak(KeyW) || ak(ArrowUp), ak(KeyS) || ak(ArrowDown));
     
     // logic
     ui.tick();

@@ -44,7 +44,8 @@ class GCLocal implements GameController {
           }
         }
         case Repair(target):
-        // TODO: repair
+        var rep = (target.stats.maxHP - target.stats.HP).minI(2);
+        queuedUpdates.push(RepairUnit(u, target, rep));
         case Capture(target):
         queuedUpdates.push(CaptureBuilding(target, u.owner));
       }
@@ -101,6 +102,8 @@ class GCLocal implements GameController {
       target.stats.HP -= dmg;
       case RemoveUnit(u):
       u.tile.units.remove(u);
+      case RepairUnit(_, target, rep):
+      target.stats.HP += rep;
       case CaptureBuilding(b, by):
       b.owner = by;
     }

@@ -3,12 +3,32 @@ package game;
 class UI {
   static final MOVE_TIME = 20;
   static final ATTACK_TIME = 15;
+  static final REPAIR_TIME = 30;
   
   public var mapRenderer:MapRenderer;
   public var localController:PCLocal;
   public var gameController:GameController;
   
   public var selection:UISelection = None;
+  public var modal = {
+       show: new Bitween(20, false)
+      ,x: -1
+      ,y: -1
+      ,w: 0
+      ,h: 0
+      ,confirmX: 4
+      ,confirmY: 3
+      ,confirmW: 16
+      ,confirmH: 24
+      ,confirmHeld: false
+      ,target: ModalTarget.MTPosition(0, 0)
+      ,targetW: 0
+      ,targetH: 0
+      ,confirmAction: null
+      ,cancelAction: UISelection.None
+      ,highlightTimer: 0
+      ,bg: null
+    };
   public var mouseAction:UIAction = None;
   
   public var handlingUpdate:Null<GameUpdate> = null;
@@ -52,13 +72,80 @@ class UI {
       }
       handlingTimer++;
       break;
-      case AttackUnit(u, du, _, _): u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; du.actionRelevant = false; done();
+      case RepairUnit(u, target, rep) if (handlingTimer < REPAIR_TIME):
+      u.actionRelevant = true;
+      target.actionRelevant = true;
+      applyOff(u, mkOff(u.tile.position, target.tile.position), u.tile.position, .7 * Timing.sineInOut.getF(handlingTimer / REPAIR_TIME));
+      handlingTimer++;
+      break;
+      case RepairUnit(u, du, _) | AttackUnit(u, du, _, _):
+      u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; du.actionRelevant = false; done();
       case MoveUnit(u, _, _, _): u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
       case _: done();
     }
+    
+    // modal
+    modal.show.tick();
+    var tp:TilePosition = (switch (modal.target) {
+        case MTPosition(x, y): {x: x, y: y};
+        case MTTile(tile):
+        var pos = tile.position.toPixel(mapRenderer.camAngle);
+        pos.x += mapRenderer.camXI + 16;
+        pos.y += mapRenderer.camYI + 24;
+        pos;
+      });
+    modal.w = (modal.targetW * Timing.quartInOut(modal.show.valueF)).round();
+    modal.h = (modal.targetH * Timing.quartOut(modal.show.valueF)).round();
+    modal.x = (tp.x - (modal.w >> 2)).clampI(0, 500 - modal.w);
+    modal.y = (tp.y).clampI(0, 300 - modal.h);
   }
   
   public function render(to:Bitmap, mx:Int, my:Int):Void {
+    // show modal
+    if (!modal.show.isOff) {
+      GSGame.makeUIBox(to, modal.x, modal.y, modal.w, modal.h);
+      if (!modal.show.isOn) {
+        to.blitAlphaRect(
+             GSGame.B_UI_BOX_CONFIRM[modal.confirmHeld ? 1 : 0]
+            ,modal.x + modal.confirmX
+            ,modal.y + modal.confirmY
+            ,0
+            ,0
+            ,16.minI(modal.w - modal.confirmX)
+            ,24.minI(modal.h - modal.confirmY)
+          );
+        to.blitAlphaRect(
+             modal.bg
+            ,modal.x + 4 + 16 + 4
+            ,modal.y + 6
+            ,0
+            ,0
+            ,modal.bg.width.minI(modal.w - 4 - 16 - 4)
+            ,modal.bg.height.minI(modal.h - 4)
+          );
+      } else {
+        to.blitAlpha(
+             GSGame.B_UI_BOX_CONFIRM[modal.confirmHeld ? 1 : 0]
+            ,modal.x + modal.confirmX
+            ,modal.y + modal.confirmY
+          );
+        if (modal.highlightTimer < 5 * 4) {
+          to.blitAlpha(
+               GSGame.B_UI_BOX_CONFIRM[2 + (modal.highlightTimer >> 2)]
+              ,modal.x + modal.confirmX
+              ,modal.y + modal.confirmY
+            );
+        }
+        to.blitAlpha(
+             modal.bg
+            ,modal.x + 4 + 16 + 4
+            ,modal.y + 6
+          );
+        modal.highlightTimer++;
+        modal.highlightTimer %= 240;
+      }
+    }
+    
     // render
     var selText = (switch (selection) {
         case STileBase(t, ts, i): switch (ts[i]) {
@@ -76,6 +163,24 @@ class UI {
     if (selection == None) return;
     selection = None;
     updateRange();
+  }
+  
+  function showModal(
+     confirm:Void->Void
+    ,cancel:UISelection
+    ,target:ModalTarget
+    ,text:String
+    ,?w:Int
+  ):Void {
+    modal.show.setTo(true);
+    modal.confirmAction = confirm;
+    modal.cancelAction = cancel;
+    modal.target = target;
+    modal.targetW = w == null ? 140 : w;
+    (modal.bg:Bitmap);
+    modal.bg = Text.left(text, modal.targetW - 8 - 16 - 4);
+    modal.targetH = (modal.bg.height + 10).maxI(16 + modal.confirmH);
+    modal.highlightTimer = 0;
   }
   
   function updateRange():Void {
@@ -118,8 +223,18 @@ class UI {
     updateRange();
   }
   
-  public function mouseDown(mx:Int, my:Int):Bool { return false; }
+  public function mouseDown(mx:Int, my:Int):Bool {
+    if (handlingUpdate != null) return true;
+    switch (mouseAction) {
+      case ConfirmModal: modal.confirmHeld = true;
+      case _: return false;
+    }
+    return true;
+  }
   public function mouseUp(mx:Int, my:Int):Bool {
+    mouseMove(mx, my);
+    modal.confirmHeld = false;
+    
     if (handlingUpdate != null) return true;
     function handleUnitOrder(unit:Unit, target:Tile):Bool {
       var accessible = unit.accessibleTiles;
@@ -128,9 +243,18 @@ class UI {
       if (unit.owner != localController.activePlayer) return false;
       for (action in actions) if (switch (action) {
           case Attack(u) | Repair(u): u.tile == target;
-          case Capture(building): building.tile == target;
+          case Capture(b): b.tile == target;
         }) {
-          localController.queuedActions.push(UnitAction(unit, action));
+          showModal(
+               () -> localController.queuedActions.push(UnitAction(unit, action))
+              ,selection
+              ,MTTile(unit.tile)
+              ,switch (action) {
+                  case Attack(u): "Attack unit\n(some more info)";
+                  case Repair(u): "Repair unit\n(some more info)";
+                  case Capture(b): "Capture building\n(some more info)";
+                }
+            );
           return true;
         }
       if (target != unit.tile
@@ -141,6 +265,8 @@ class UI {
       return false;
     }
     switch [selection, mouseAction] {
+      case [_, ConfirmModal]: modal.show.setTo(false); if (modal.confirmAction != null) modal.confirmAction();
+      case [_, CancelModal]: modal.show.setTo(false); selection = modal.cancelAction;
       case [STileBase(_, ts, i), SelectTile(target)]: switch (ts[i]) {
         case SUnit(u): if (!handleUnitOrder(u, target)) selectTile(target);
         case _: selectTile(target);
@@ -157,7 +283,21 @@ class UI {
       return true;
     }
     mouseAction = None;
-    // handle overlays ...
+    
+    // modal
+    if (!modal.show.isOff) {
+      if (mx.withinI(modal.x + modal.confirmX, modal.x + modal.confirmX + modal.confirmW - 1)
+          && my.withinI(modal.y + modal.confirmY, modal.y + modal.confirmY + modal.confirmH - 1)) {
+        mouseAction = ConfirmModal;
+      } else {
+        mouseAction = CancelModal;
+      }
+      return true;
+    }
+    
+    // TODO: handle overlays ...
+    
+    // map interaction
     var tile = mapRenderer.mouseToTile(mx, my);
     if (tile == null) return false;
     mouseAction = SelectTile(tile);
@@ -181,6 +321,8 @@ class UI {
 enum UIAction {
   None;
   SelectTile(t:Tile);
+  CancelModal;
+  ConfirmModal;
 }
 
 enum UISelection {
@@ -189,4 +331,9 @@ enum UISelection {
   STile(t:Tile);
   SUnit(u:Unit);
   SBuilding(b:Building);
+}
+
+enum ModalTarget {
+  MTPosition(x:Int, y:Int);
+  MTTile(t:Tile);
 }

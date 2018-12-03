@@ -17,9 +17,9 @@ class Text {
     //var f = font.FontBase.init(am.getBitmap("numerals"), 10, 16, Pal.pal[15], Pal.pal[13], Pal.pal[12], 1, 0, 0, 0, 32, 32, false);
     fonts = [
         // font.FontFancy8x13.initAuto(am, Pal.P[36], Pal.P[19], Pal.P[20])
-         font.FontNS.initAuto(am, GSGame.B_PAL[15], GSGame.B_PAL[13], GSGame.B_PAL[12])
+         font.FontNS.initAuto(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
         //,f
-        ,font.FontNS.initAuto(am, GSGame.B_PAL[29], GSGame.B_PAL[28], GSGame.B_PAL[27])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
         //,font.FontBasic3x9.init(am, Pal.P[36], Pal.P[19], Pal.P[20])
       ];
   }
