@@ -52,30 +52,35 @@ Special attributes:
  - Camouflage - `STL` set to remaining `MP` at the end of turn
  - Kamikaze - Dies when attacking
  - Siege - Cannot attack if any `MP` was spent during the turn, cannot counter-strike
+ - Medusa gaze - Any attacked unit immediately turns neutral (no counter-strike)
+ - Weak start - Produced with 1 `HP`
+ - Attack health - `ATK = ATK + HP`
+ - Max count X - Cannot produce another unit if the player already owns X or more (can still capture)
+ - Capturing - Unit can capture buildings and units
 
-| Type           | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
-| -------------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
+| Tier | Type           | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
+| ---- | -------------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
 | **Ground** |
-| Wolf           | 4     | 2    | 3    | 3     | 1     | 0     | 3     | 0     | - |
-| Bull           | 6     | 5    | 3    | 2*    | 1     | 1     | 2     | 0     | Charge |
-| Chamois        | 6     | 5    | 3    | 0*    | 1     | 1     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
-| Spider         | 3     | 2    | 4    | 2     | 1     | 0     | 3     | 1     | Desert affinity |
-| Bombardier ant | 5     | 3    | 2    | 2     | 3     | 0     | 4     | 0     | Siege |
-| Hog            | 9     | 10*  | 1    | 0*    | 1     | 0     | 2     | 0     | Starts with 1 `HP`, `ATK = HP - 1` |
-| Monkey         | 4     | 3    | 3    | 0     | 0     | 0     | 3     | 0     | Repair |
-| **Flying** |
-| Bumblebee      | 4     | 1    | 1    | 6*    | 1     | 0     | 3     | 1     | Kamikaze, Siege |
-| Mosquito       | 5     | 2    | 3    | 2     | 1     | 0     | 4     | 1     | - |
-| Bat            | 8     | 4    | 4    | 2     | 1     | 0     | 4     | 0     | - |
-| Eagle          | 10    | 5    | 3    | 3     | 1     | 1     | 4     | 0     | - |
-| **Swimming** |
-| Octopus        | 6     | 4    | 4    | 3     | 1     | 1     | 3     | 1     | - |
-| Squid          | 4     | 2    | 3    | 2     | 2     | 2     | 4     | 2     | - |
-| **Amphibian** |
-| Frog           | 1     | 1    | 3    | 0     | 0     | 2     | 2     | 0     | - |
-| Snake          | 7     | 3    | 3    | 2     | 1     | 0     | 3     | 0*    | Camouflage |
-| Swordfish      | 9     | 2    | 6*   | 0*    | 1     | 1     | 2     | 1     | Charge |
-| Medusa         | 15    | 4    | 3    | 1*    | 2     | 0     | 4     | 1     | Any attacked unit immediately turns neutral (no counter-strike) |
+| 0 | Wolf           | 4     | 2    | 3    | 3     | 1     | 0     | 3     | 0     | Capturing |
+| 3 | Bull           | 10    | 6    | 3    | 2     | 1     | 1     | 2     | 0     | Charge |
+| 3 | Chamois        | 10    | 6    | 3    | 0     | 1     | 1     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
+| 1 | Spider         | 4     | 2    | 4    | 1     | 1     | 0     | 3     | 1     | Capturing, Desert affinity |
+| 2 | Bombardier ant | 6     | 3    | 2    | 2     | 4     | 0     | 1     | 0     | Siege |
+| 4 | Hog            | 9     | 10   | 3    | 0     | 1     | 0     | 2     | 0     | Weak start, Attack health, Max count 1 |
+| 1 | Monkey         | 4     | 1    | 2    | 0     | 0     | 2     | 1     | 0     | Capturing, Repair, Mountain affinity, Hill affinity, Max count 2 |
+| | **Flying** |
+| 2 | Bumblebee      | 4     | 1    | 5    | 6     | 1     | 0     | 1     | 0     | Kamikaze, Siege |
+| 2 | Mosquito       | 5     | 2    | 3    | 3     | 1     | 0     | 3     | 1     | - |
+| 0 | Bat            | 5     | 2    | 8    | 0     | 0     | 0     | 4     | 0     | Max count 1 |
+| 4 | Eagle          | 10    | 5    | 3    | 3     | 1     | 1     | 4     | 0     | - |
+| | **Swimming** |
+| 2 | Squid          | 10    | 2    | 3    | 4     | 4     | 2     | 1     | 0     | Siege, Max count 2 |
+| 1 | Octopus        | 6     | 4    | 3    | 4     | 1     | 0     | 3     | 1     | - |
+| 3 | Swordfish      | 9     | 4    | 6    | 0     | 1     | 1     | 2     | 1     | Charge, Max count 1 |
+| | **Amphibian** |
+| 1 | Frog           | 2     | 1    | 1    | 0     | 0     | 3     | 1     | 0     | - |
+| 2 | Snake          | 5     | 3    | 3    | 2     | 1     | 0     | 3     | 0     | Capturing, Camouflage |
+| 4 | Medusa         | 15    | 4    | 3    | 1     | 2     | 2     | 3     | 0     | Medusa gaze, Max count 1 |
 
 ### Basic building types ###
 
@@ -85,8 +90,8 @@ Special attributes:
 | Factoreon   | Produces ground units |
 | Dock        | Produces swimming and amphibian units |
 | Eyrie       | Produces flying units |
-| Forge       | Provides 1 technological advance (for the rest of the game) |
-| Fortress    | Units on fortress tile get +1 DEF, +1 VIS, +1 STL |
+| Forge       | Increases available production tier by 1 when owned |
+| Fortress    | Units on fortress tile get +1 ATK, +1 DEF, +1 VIS |
 | Shrine      | Provides [ownership](#land-ownership) of nearby land |
 
 ### Unit-vs-unit combat ###
@@ -119,7 +124,7 @@ The attack consists of two phases:
 
 During this phase, `AU` deals some damage to `DU`. The amount of damage is subtracted from the HP of `DU`, and is:
 
-    DMG = max(1, `AU`.ATK - `DU`.DEF)
+    DMG = `AU`.ATK - `DU`.DEF
 
 At least one point of damage is always dealt.
 
@@ -127,12 +132,13 @@ At least one point of damage is always dealt.
 
 During this phase, `DU` deals some damage back to to `AU`. This phase only happens if:
 
+    AU.RNG + AU.VIS >= dst(AU, DU) - DU.STL (visibility)
     DU.RNG >= dst(AU, DU) (range)
     DU.ATK > 0 (can attack)
     DU.HP > 0 (did not die)
     !DU.defended (did not defend this turn)
 
-This phase will not take place if `DU` was destroyed during the previous phase (third condition) or if `DU` already defended against an attack (last condition). The amount of damage is subtracted from the HP of `AU`, and is:
+This phase will not take place if `DU` was destroyed during the previous phase (fourth condition) or if `DU` already defended against an attack (last condition). The amount of damage is subtracted from the HP of `AU`, and is:
 
     DMG = max(0, DU.ATK - AU.DEF)
 
@@ -187,7 +193,6 @@ Players can own land based on Shrines they have captured. The range of ownership
 
 Any owned tiles:
 
- - can be [sacrificed](#sacrifices)
  - [fog of war](#fog-of-war) is cleared on them
  - provide one [cycle](#cycles) at the beginning of their owner's turn
 
@@ -204,7 +209,6 @@ Units can be produced in factories. Starting the production takes `CYC` cycles.
 As the action of their Temple-tron, a player can perform a ritualistic sacrifice. The effects of the sacrifice depend on their faction's [god](#gods). They may sacrifice:
 
  - a unit - if it can perform an action this turn, but has not yet (i.e. not units that have just been produced, nor units that have moved / attacked / ...)
- - a tile - if they own that tile
  - a turn - if they have performed no other actions during that turn
  - money - 100 cycles
 
@@ -215,25 +219,21 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
 | Juggernauts | Ares | Destruction |
 | | - passive | bonus to attack? |
 | | - sacrifice **unit** | +2 `ATK` on another unit for 1 turn |
-| | - sacrifice **tile** | AoE attack (4 `ATK`, 2-wide hex area) |
-| | - sacrifice **turn** | ? |
+| | - sacrifice **turn** | ? AoE attack (4 `ATK`, 2-wide hex area) |
 | | - sacrifice **money** | ? |
 | Harlequins | Dionysus | Trickery, Confusion?, Charm? |
 | | - passive | bonus to stealth? |
 | | - sacrifice **unit** | +2 `STL` on another unit for 1 turn |
-| | - sacrifice **tile** | ? |
 | | - sacrifice **turn** | ? |
 | | - sacrifice **money** | ? |
 | Zephyrs | Hermes | Teleportation / transport |
 | | - passive | bonus to movement? |
 | | - sacrifice **unit** | +2 `MP` on another unit for 1 turn |
-| | - sacrifice **tile** | ? |
 | | - sacrifice **turn** | ? |
 | | - sacrifice **money** | ? |
 | Reapers | Hades | Death? Stasis? |
 | | - passive | units always hit back (even when just killed) |
 | | - sacrifice **unit** | +2 `DEF` on another unit for 1 turn |
-| | - sacrifice **tile** | ? |
 | | - sacrifice **turn** | ? |
 | | - sacrifice **money** | ? |
 
@@ -248,6 +248,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
    - capture - not instant - building HP, capture consecutively with single unit
      - capture - first into neutral (half the time), then into own
    - action stats in modals
+   - 
  - model / view architecture
    - model - game, map, units, etc, with no link to the view
      - easily extendable to AIs, local MP or even MP-over-server
