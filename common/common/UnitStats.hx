@@ -15,6 +15,7 @@ typedef UnitStats = {
     ,moved:Bool
     ,acted:Bool
     ,defended:Bool
+    ,captureTimer:Int
     ,tier:Int
     ,capture:Bool
     ,maxCount:Int

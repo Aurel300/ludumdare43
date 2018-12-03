@@ -13,14 +13,17 @@ class Text {
   
   @:access(font)
   public static function load(am:AssetManager):Void {
-    
-    //var f = font.FontBase.init(am.getBitmap("numerals"), 10, 16, Pal.pal[15], Pal.pal[13], Pal.pal[12], 1, 0, 0, 0, 32, 32, false);
     fonts = [
-        // font.FontFancy8x13.initAuto(am, Pal.P[36], Pal.P[19], Pal.P[20])
          font.FontNS.initAuto(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
-        //,f
-        ,font.FontNS.initAuto(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
-        //,font.FontBasic3x9.init(am, Pal.P[36], Pal.P[19], Pal.P[20])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[0 * 30 + 15 + 10], GSGame.B_PAL[0 * 30 + 15 + 7], GSGame.B_PAL[0 * 30 + 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[1 * 30 + 15 + 10], GSGame.B_PAL[1 * 30 + 15 + 7], GSGame.B_PAL[1 * 30 + 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[2 * 30 + 15 + 10], GSGame.B_PAL[2 * 30 + 15 + 7], GSGame.B_PAL[2 * 30 + 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[3 * 30 + 15 + 10], GSGame.B_PAL[3 * 30 + 15 + 7], GSGame.B_PAL[3 * 30 + 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[0 * 30 + 15 + 10], GSGame.B_PAL[0 * 30 + 15 + 7], GSGame.B_PAL[0 * 30 + 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[1 * 30 + 15 + 10], GSGame.B_PAL[1 * 30 + 15 + 7], GSGame.B_PAL[1 * 30 + 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[2 * 30 + 15 + 10], GSGame.B_PAL[2 * 30 + 15 + 7], GSGame.B_PAL[2 * 30 + 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[3 * 30 + 15 + 10], GSGame.B_PAL[3 * 30 + 15 + 7], GSGame.B_PAL[3 * 30 + 15 + 4])
       ];
   }
   /*
@@ -30,6 +33,11 @@ class Text {
   */
   public static inline function t(ft:FontType):String {
     return "$" + String.fromCharCode("A".code + ft);
+  }
+  
+  public static inline function tp(of:Player, ?regular:Bool):String {
+    trace(of.playerColour());
+    return t((cast (regular == null || regular ? FontType.Regular : FontType.Small):Int) + of.playerColour());
   }
   /*
   public static inline function c(l:Int):String {
@@ -51,8 +59,8 @@ class Text {
   public static function left(txt:String, width:Int, ?ft:FontType = Regular):Bitmap {
     var lines = txt.split("\n");
     var res = Platform.createBitmap(width, lines.length * 16, 0);
-    fonts[ft].render(res, 0, 0, txt, fonts);
-    return res;
+    var end = fonts[ft].render(res, 0, 0, txt, fonts);
+    return res.fluent >> new Cut(0, 0, res.width, end.y + 6);
   }
   
   public static function justify(txt:String, width:Int, ?ft:FontType = Regular, ?lh:Int = 16):Bitmap {

@@ -9,7 +9,19 @@ class MapRenderer {
   public var range:Array<Tile> = [];
   public var actions:Array<UnitAction> = [];
   public var rangeColour:Int = 0;
+  
   public var hpBarShow = new Bitween(15, true);
+  
+  public var captureBar = {
+       show: new Bitween(15, false)
+      ,target: (null:Building)
+      ,prevNum: 1
+      ,nextNum: 0
+      ,cycleProg: 1
+      ,buf: Platform.createBitmap(11, 11, 0)
+      ,attacker: (null:Player)
+      ,capture: false
+    };
   
   public var camXI:Int = 50;
   public var camYI:Int = 100;
@@ -62,6 +74,7 @@ class MapRenderer {
   ) {
     // tickers
     hpBarShow.tick();
+    captureBar.show.tick();
     
     // update camera
     
@@ -157,20 +170,68 @@ class MapRenderer {
       }
     }
     
+    // actions
     for (a in actions) {
-      var type = -1;
+      var frame = -1;
       var tilePosition = (switch (a) {
-          case Attack(target): type = 0; target.tile.position;
-          case Repair(target): type = 1; target.tile.position;
-          case Capture(target): type = 2; target.tile.position;
+          case Attack(target): frame = 0; target.tile.position;
+          case Repair(target): frame = 1; target.tile.position;
+          case Capture(target): frame = 2; target.tile.position;
+          case AttackNoDamage(target): frame = 3; target.tile.position;
         });
       var screenPos = tilePosition.toPixel(camAngle);
-      if (type == -1) continue;
+      if (frame == -1) continue;
       ab.blitAlpha(
-           GSGame.B_ACTIONS[type]
+           GSGame.B_ACTIONS[frame]
           ,screenPos.x + camXI
           ,screenPos.y + camYI
         );
+    }
+    
+    if (!captureBar.show.isOff) {
+      var textOffX = 0;
+      var capFrame = GSGame.B_CAPTURE[captureBar.capture ? 0 : 1];
+      var text = (switch [captureBar.prevNum, captureBar.capture] {
+          case [0, true]: textOffX = 1; "CAPTURED!";
+          case [_, true]: "CAPTURING";
+          case [0, false]: textOffX = 1; "RAZED!";
+          case [_, false]: "RAZING";
+        });
+      
+      var screenPos = captureBar.target.tile.position.toPixel(camAngle);
+      screenPos.x += camXI;
+      screenPos.y += camYI;
+      var barH = Timing.quartInOut.getI(captureBar.show.valueF, capFrame.height);
+      var barY = capFrame.height - barH;
+      screenPos.y += barY;
+      
+      ab.blitAlphaRect(
+           capFrame
+          ,screenPos.x + 4, screenPos.y - 30
+          ,0, 0
+          ,Timing.quartInOut.getI(captureBar.show.valueF, capFrame.width)
+          ,barH
+        );
+      captureBar.buf.fill(0);
+      var numY = Timing.quartInOut.getI((captureBar.cycleProg / 16), 13);
+      Text.render(captureBar.buf, 2, 1 + numY, '${Text.tp(captureBar.attacker)}${captureBar.prevNum}');
+      Text.render(captureBar.buf, 2, 1 - 13 + numY, '${Text.tp(captureBar.attacker)}${captureBar.nextNum}');
+      ab.blitAlpha(captureBar.buf, screenPos.x + 5, screenPos.y - 29);
+      
+      Text.render(
+           ab
+          ,screenPos.x + 16 + textOffX
+          ,screenPos.y - 27
+          ,Text.tp(captureBar.attacker, false) + text.substr(0, captureBar.show.value)
+        );
+      
+      if (captureBar.cycleProg != 0 && captureBar.show.isOn) {
+        captureBar.cycleProg++;
+        if (captureBar.cycleProg >= 16) {
+          captureBar.prevNum = captureBar.nextNum;
+          captureBar.cycleProg = 0;
+        }
+      }
     }
   }
 }

@@ -76,7 +76,7 @@ class GSEditor extends JamState {
       }
       mapRenderer.sortTiles(true);
       // select terrain, building, or unit
-      case KeyZ | KeyX | KeyC | KeyV | KeyB | KeyN:
+      case KeyZ | KeyX | KeyC | KeyV | KeyB | KeyN | KeyM:
       switch (mode) {
         case EMTerrain: selectedTerrain = (switch (k) {
             case KeyZ: TTPlain;
@@ -90,17 +90,21 @@ class GSEditor extends JamState {
         case EMBuilding: selectedBuilding = (switch (k) {
             case KeyZ: BTTempleTron;
             case KeyX: BTFactoreon;
-            case KeyC: BTForge;
-            case KeyV: BTFortress;
-            case KeyB: BTShrine;
+            case KeyC: BTDock;
+            case KeyV: BTEyrie;
+            case KeyB: BTForge;
+            case KeyN: BTFortress;
+            case KeyM: BTShrine;
             case _: return;
           });
         case EMUnit: selectedUnit = (switch (k) {
-            case KeyZ: Bull;
-            case KeyX: Chamois;
-            case KeyC: BombardierAnt;
-            case KeyV: Bat;
-            case KeyB: Monkey;
+            case KeyZ: Wolf;
+            case KeyX: Bull;
+            case KeyC: Chamois;
+            case KeyV: Spider;
+            case KeyB: BombardierAnt;
+            case KeyN: Hog;
+            case KeyM: Monkey;
             case _: return;
           });
       }
@@ -168,7 +172,7 @@ class GSEditor extends JamState {
           );
       }
       case EMBuilding:
-      for (i in 0...5) {
+      for (i in 0...7) {
         ab.blitAlpha(
              GSGame.B_BUILDINGS[(cast i:BuildingType)][selectedOwner.playerColour()]
             ,3 + i * 18
@@ -176,7 +180,7 @@ class GSEditor extends JamState {
           );
       }
       case EMUnit:
-      for (i in 0...5) {
+      for (i in 0...7) {
         ab.blitAlpha(
              GSGame.B_UNITS[(cast i:UnitType)][selectedOwner.playerColour()]
             ,3 + i * 18

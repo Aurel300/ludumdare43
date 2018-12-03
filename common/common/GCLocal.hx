@@ -14,6 +14,7 @@ class GCLocal implements GameController {
   public function tick(g:Game):Void {
     function handleMoveUnit(u:Unit, to:Tile):Void {
       u.stats.moved = true;
+      u.stats.captureTimer = 0;
       var path = u.pathTo(to);
       var cur = u.tile;
       for (p in path) {
@@ -28,26 +29,22 @@ class GCLocal implements GameController {
     function handleUnitAction(u:Unit, action:UnitAction):Void {
       if (u.stats.acted) return;
       u.stats.acted = true;
+      if (!action.match(Capture(_))) u.stats.captureTimer = 0;
       switch (action) {
         case Attack(target):
-        var dmgA = u.damageTo(target, true);
-        queuedUpdates.push(AttackUnit(u, target, dmgA, true));
-        if (target.stats.HP - dmgA <= 0) {
-          queuedUpdates.push(RemoveUnit(target));
-        } else if (!target.stats.defended) {
-          var dmgD = target.damageTo(u, false);
-          if (dmgD > 0 && target.stats.RNG >= target.tile.position.distance(u.tile.position)) {
-            queuedUpdates.push(AttackUnit(target, u, dmgD, false));
-            if (u.stats.HP - dmgD <= 0) {
-              queuedUpdates.push(RemoveUnit(u));
-            }
-          }
-        }
+        var attack = u.summariseAttack(target);
+        if (attack.willStrike) queuedUpdates.push(AttackUnit(u, target, attack.dmgA, true));
+        if (attack.killD) queuedUpdates.push(RemoveUnit(target));
+        if (attack.willCounter) queuedUpdates.push(AttackUnit(target, u, attack.dmgD, false));
+        if (attack.killA) queuedUpdates.push(RemoveUnit(u));
         case Repair(target):
-        var rep = (target.stats.maxHP - target.stats.HP).minI(2);
-        queuedUpdates.push(RepairUnit(u, target, rep));
+        var repair = u.summariseRepair(target);
+        queuedUpdates.push(RepairUnit(u, target, repair.rep));
         case Capture(target):
-        queuedUpdates.push(CaptureBuilding(target, u.owner));
+        var capture = u.summariseCapture(target);
+        if (capture.captured) queuedUpdates.push(CaptureBuilding(u, target, capture.capture));
+        else queuedUpdates.push(CapturingBuilding(u, target, capture.capture, capture.progress));
+        case AttackNoDamage(_):
       }
     }
     var stop = false;
@@ -104,8 +101,11 @@ class GCLocal implements GameController {
       u.tile.units.remove(u);
       case RepairUnit(_, target, rep):
       target.stats.HP += rep;
-      case CaptureBuilding(b, by):
-      b.owner = by;
+      case CaptureBuilding(u, b, _):
+      u.stats.captureTimer = 0;
+      b.owner = (b.owner == null ? u.owner : null);
+      case CapturingBuilding(u, b, _, prog):
+      u.stats.captureTimer = prog;
     }
     return update;
   }

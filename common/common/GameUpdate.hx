@@ -5,5 +5,6 @@ enum GameUpdate {
   AttackUnit(au:Unit, du:Unit, dmg:Int, attack:Bool);
   RemoveUnit(u:Unit);
   RepairUnit(u:Unit, target:Unit, rep:Int);
-  CaptureBuilding(b:Building, by:Player);
+  CaptureBuilding(u:Unit, b:Building, capture:Bool);
+  CapturingBuilding(u:Unit, b:Building, capture:Bool, progress:Int);
 }

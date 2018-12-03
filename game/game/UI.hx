@@ -4,6 +4,7 @@ class UI {
   static final MOVE_TIME = 20;
   static final ATTACK_TIME = 15;
   static final REPAIR_TIME = 30;
+  static final CAPTURE_TIME = 60;
   
   public var mapRenderer:MapRenderer;
   public var localController:PCLocal;
@@ -64,8 +65,7 @@ class UI {
       case MoveUnit(u, from, to, _) if (handlingTimer < MOVE_TIME):
       applyOff(u, mkOff(from, to), from, -1 + Timing.quartInOut.getF(handlingTimer / MOVE_TIME));
       u.actionRelevant = true;
-      handlingTimer++;
-      break;
+      handlingTimer++; break;
       case AttackUnit(au, du, dmg, attack) if (handlingTimer < ATTACK_TIME):
       du.hurtTimer = dmg * 8;
       au.actionRelevant = true;
@@ -75,14 +75,33 @@ class UI {
       } else {
         au.offY = -3 * Timing.quartOut.getF(handlingTimer / ATTACK_TIME);
       }
-      handlingTimer++;
-      break;
+      handlingTimer++; break;
       case RepairUnit(u, target, rep) if (handlingTimer < REPAIR_TIME):
       u.actionRelevant = true;
       target.actionRelevant = true;
       applyOff(u, mkOff(u.tile.position, target.tile.position), u.tile.position, .7 * Timing.sineInOut.getF(handlingTimer / REPAIR_TIME));
-      handlingTimer++;
-      break;
+      handlingTimer++; break;
+      case CapturingBuilding(u, b, capture, progress) if (handlingTimer < CAPTURE_TIME):
+      if (handlingTimer == 0) {
+        mapRenderer.captureBar.show.setTo(true);
+        mapRenderer.captureBar.target = b;
+        mapRenderer.captureBar.prevNum = b.captureCost - (progress - 1);
+        mapRenderer.captureBar.nextNum = b.captureCost - progress;
+        mapRenderer.captureBar.cycleProg = 1;
+        mapRenderer.captureBar.capture = capture;
+      }
+      handlingTimer++; break;
+      case CaptureBuilding(u, b, capture) if (handlingTimer < CAPTURE_TIME):
+      if (handlingTimer == 0) {
+        mapRenderer.captureBar.show.setTo(true);
+        mapRenderer.captureBar.target = b;
+        mapRenderer.captureBar.prevNum = 1;
+        mapRenderer.captureBar.nextNum = 0;
+        mapRenderer.captureBar.cycleProg = 1;
+        mapRenderer.captureBar.capture = capture;
+      }
+      handlingTimer++; break;
+      case CapturingBuilding(_, _, _, _) | CaptureBuilding(_, _, _): mapRenderer.captureBar.show.setTo(false); done();
       case RepairUnit(u, du, _) | AttackUnit(u, du, _, _):
       u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; du.actionRelevant = false; done();
       case MoveUnit(u, _, _, _): u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
@@ -109,9 +128,10 @@ class UI {
     // show modal
     if (!modal.show.isOff) {
       GSGame.makeUIBox(to, modal.x, modal.y, modal.w, modal.h);
+      var confirmFrame = GSGame.B_UI_BOX_CONFIRM[modal.confirmAction != null ? (modal.confirmHeld ? 1: 0) : 2];
       if (!modal.show.isOn) {
         to.blitAlphaRect(
-             GSGame.B_UI_BOX_CONFIRM[modal.confirmHeld ? 1 : 0]
+             confirmFrame
             ,modal.x + modal.confirmX
             ,modal.y + modal.confirmY
             ,0
@@ -130,13 +150,13 @@ class UI {
           );
       } else {
         to.blitAlpha(
-             GSGame.B_UI_BOX_CONFIRM[modal.confirmHeld ? 1 : 0]
+             confirmFrame
             ,modal.x + modal.confirmX
             ,modal.y + modal.confirmY
           );
-        if (modal.highlightTimer < 5 * 4) {
+        if (modal.confirmAction != null && modal.highlightTimer < 5 * 4) {
           to.blitAlpha(
-               GSGame.B_UI_BOX_CONFIRM[2 + (modal.highlightTimer >> 2)]
+               GSGame.B_UI_BOX_CONFIRM[3 + (modal.highlightTimer >> 2)]
               ,modal.x + modal.confirmX
               ,modal.y + modal.confirmY
             );
@@ -247,18 +267,45 @@ class UI {
       if (unit.stats.acted) return false;
       if (unit.owner != localController.activePlayer) return false;
       for (action in actions) if (switch (action) {
-          case Attack(u) | Repair(u): u.tile == target;
+          case Attack(u) | Repair(u) | AttackNoDamage(u): u.tile == target;
           case Capture(b): b.tile == target;
         }) {
+          var confirmAction = () -> localController.queuedActions.push(UnitAction(unit, action));
+          var text = (switch (action) {
+              case Attack(u):
+              var attack = unit.summariseAttack(u);
+              'Attack ${Text.tp(u.owner)}${u.name}${Text.t(Regular)}'
+              + (attack.willStrike
+                ? '\n${Text.t(Small)}STRIKE'
+                  + '\n${Text.t(Regular)} DMG: ${attack.dmgA}' + (attack.killD ? ' ${Text.t(SmallRed)}LETHAL' : "")
+                : '')
+              + (attack.willCounter
+                ? '\n${Text.t(Small)}COUNTER-STRIKE'
+                  + '\n${Text.t(Regular)} DMG: ${attack.dmgD}' + (attack.killA ? ' ${Text.t(SmallRed)}LETHAL' : "")
+                : '\n${Text.t(Small)}NO COUNTER-STRIKE'
+                  + (attack.killD ? '\n${Text.t(Regular)} ${Text.t(SmallYellow)}(Unit destroyed)' : "")
+                );
+              case AttackNoDamage(u):
+              confirmAction = null;
+              'Attack ${Text.tp(u.owner)}${u.name}${Text.t(Regular)}'
+              + '\n${Text.t(Small)}STRIKE'
+              + '\n${Text.t(Regular)} DMG: ${Text.t(SmallRed)}0';
+              case Repair(u):
+              var repair = unit.summariseRepair(u);
+              'Repair ${u.name}'
+              + '\n HP: +${repair.rep}' + (repair.full ? ' ${Text.t(SmallGreen)}FULL' : "");
+              case Capture(b):
+              var capture = unit.summariseCapture(b);
+              (capture.capture ? "Capture" : "Raze")
+              + ' ${Text.tp(b.owner)}${b.name}${Text.t(Regular)}'
+              + '\n ${Text.t(SmallYellow)}' + (capture.start ? "(START)" : "(CONTINUE)")
+              + '\n${Text.t(Regular)} Turns left: ${capture.turnsLeft}';
+            });
           showModal(
-               () -> localController.queuedActions.push(UnitAction(unit, action))
+               confirmAction
               ,selection
               ,MTTile(unit.tile)
-              ,switch (action) {
-                  case Attack(u): "Attack unit\n(some more info)";
-                  case Repair(u): "Repair unit\n(some more info)";
-                  case Capture(b): "Capture building\n(some more info)";
-                }
+              ,text
             );
           return true;
         }

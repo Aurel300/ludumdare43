@@ -115,6 +115,7 @@ class UnitTypeTools {
         ,moved: false
         ,acted: false
         ,defended: false
+        ,captureTimer: 0
         ,charge: db(stats.charge)
         ,repair: db(stats.repair)
         ,affinity: stats.affinity != null ? stats.affinity : []

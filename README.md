@@ -124,7 +124,7 @@ The attack consists of two phases:
 
 During this phase, `AU` deals some damage to `DU`. The amount of damage is subtracted from the HP of `DU`, and is:
 
-    DMG = `AU`.ATK - `DU`.DEF
+    DMG = max(0, AU.ATK - DU.DEF)
 
 At least one point of damage is always dealt.
 
@@ -248,7 +248,6 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
    - capture - not instant - building HP, capture consecutively with single unit
      - capture - first into neutral (half the time), then into own
    - action stats in modals
-   - 
  - model / view architecture
    - model - game, map, units, etc, with no link to the view
      - easily extendable to AIs, local MP or even MP-over-server
@@ -260,9 +259,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
      - QA
      - AI simulation?
  - view
-   x hex grid calculations
-   x display grid, tiles, units and buildings
    . highlight tiles, units
-   - display possible actions for units
+   . display possible actions for units
      - visualise terrain difficulty
-   - UI
+   - **UI**
