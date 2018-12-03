@@ -108,23 +108,8 @@ class MapRenderer {
         ab.blitAlphaRect(GSGame.B_HP_BAR[which + (full ? 2 : 0)], cx, cy + segH - segY, 0, 0, segY, segH);
         cx += full ? 4 : 3;
       }
-      
-      //ab.fillRect(bx + 7, by - 2, unit.stats.maxHP * 2 + 2, 4, GSGame.B_PAL[31]);
-      //if (unit.stats.HP > 0) ab.fillRect(bx + 8, by - 1, unit.stats.HP * 2, 2, GSGame.B_PAL[29]);
-      //ab.fillRect(bx + 7, by - 5, unit.stats.maxMP * 2 + 2, 3, GSGame.B_PAL[123]);
-      //if (unit.stats.MP > 0) ab.fillRect(bx + 8, by - 4, unit.stats.MP * 2, 2, GSGame.B_PAL[130]);
     }
     for (sti in tilesSorted) {
-    //for (y in 0...map.height) for (x in 0...map.width) {
-      //var tile = map.getXY(camAngle.withinF(15, 195) ? x : map.width - x - 1, camAngle.withinF(0, 120) || camAngle >= 300 ? y : map.height - y - 1);
-      //var ax = x;
-      //var ay = y;
-      //switch (prevAngle) {
-      //  case 1: 
-      //  case 2: x = map.width - x - 1;
-      //  case _: 
-      //}
-      //var tile = map.getXY(ax, ay);
       var tile = map.tiles[sti];
       if (tile != null) {
         var screenPos = tile.position.toPixel(camAngle);

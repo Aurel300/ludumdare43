@@ -41,6 +41,11 @@ class UI {
     localController.updateObservers.push(tick);
   }
   
+  public function clearUI():Void {
+    modal.show.setTo(false);
+    deselect();
+  }
+  
   public function tick():Void {
     // logic
     function mkOff(from:TilePosition, to:TilePosition):TilePosition {
@@ -309,7 +314,7 @@ class UI {
     switch (key) {
       case Space:
       localController.queuedActions.push(EndTurn);
-      deselect();
+      clearUI();
       case Tab:
       mapRenderer.hpBarShow.toggle();
       case _: return false;

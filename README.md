@@ -47,24 +47,44 @@ Special attributes:
 
  - Charge - `ATK` increased by hex distance from tile before movement
  - Terrain affinity - `TDF = 1` for the given terrain
- - Flying
- - Swimming
  - Repair - Can restore 2 `HP` on a friendly unit
+ - Amphibian - Ground + Swimming
+ - Camouflage - `STL` set to remaining `MP` at the end of turn
+ - Kamikaze - Dies when attacking
+ - Siege - Cannot attack if any `MP` was spent during the turn, cannot counter-strike
 
 | Type           | `CYC` | `HP` | `MP` | `ATK` | `RNG` | `DEF` | `VIS` | `STL` | Special |
 | -------------- | ----- | ---- | ---- | ----- | ----- | ----- | ----- | ----- | ------- |
+| **Ground** |
+| Wolf           | 4     | 2    | 3    | 3     | 1     | 0     | 3     | 0     | - |
 | Bull           | 6     | 5    | 3    | 2*    | 1     | 1     | 2     | 0     | Charge |
 | Chamois        | 6     | 5    | 3    | 0*    | 1     | 1     | 2     | 0     | Charge, Mountain affinity, Hill affinity |
-| Bombardier ant | 5     | 3    | 2    | 2     | 3     | 0     | 4     | 0     | - |
-| Bat            | 8     | 4    | 5    | 2     | 1     | 0     | 4     | 0     | Flying |
+| Spider         | 3     | 2    | 4    | 2     | 1     | 0     | 3     | 1     | Desert affinity |
+| Bombardier ant | 5     | 3    | 2    | 2     | 3     | 0     | 4     | 0     | Siege |
+| Hog            | 9     | 10*  | 1    | 0*    | 1     | 0     | 2     | 0     | Starts with 1 `HP`, `ATK = HP - 1` |
 | Monkey         | 4     | 3    | 3    | 0     | 0     | 0     | 3     | 0     | Repair |
+| **Flying** |
+| Bumblebee      | 4     | 1    | 1    | 6*    | 1     | 0     | 3     | 1     | Kamikaze, Siege |
+| Mosquito       | 5     | 2    | 3    | 2     | 1     | 0     | 4     | 1     | - |
+| Bat            | 8     | 4    | 4    | 2     | 1     | 0     | 4     | 0     | - |
+| Eagle          | 10    | 5    | 3    | 3     | 1     | 1     | 4     | 0     | - |
+| **Swimming** |
+| Octopus        | 6     | 4    | 4    | 3     | 1     | 1     | 3     | 1     | - |
+| Squid          | 4     | 2    | 3    | 2     | 2     | 2     | 4     | 2     | - |
+| **Amphibian** |
+| Frog           | 1     | 1    | 3    | 0     | 0     | 2     | 2     | 0     | - |
+| Snake          | 7     | 3    | 3    | 2     | 1     | 0     | 3     | 0*    | Camouflage |
+| Swordfish      | 9     | 2    | 6*   | 0*    | 1     | 1     | 2     | 1     | Charge |
+| Medusa         | 15    | 4    | 3    | 1*    | 2     | 0     | 4     | 1     | Any attacked unit immediately turns neutral (no counter-strike) |
 
 ### Basic building types ###
 
 | Type        | Special |
 | ----------- | ------- |
 | Temple-tron | Captured = owner defeated + effects of Shrine |
-| Factory     | Produces units |
+| Factoreon   | Produces ground units |
+| Dock        | Produces swimming and amphibian units |
+| Eyrie       | Produces flying units |
 | Forge       | Provides 1 technological advance (for the rest of the game) |
 | Fortress    | Units on fortress tile get +1 DEF, +1 VIS, +1 STL |
 | Shrine      | Provides [ownership](#land-ownership) of nearby land |
@@ -92,10 +112,10 @@ The attacking unit (`AU`) can attack the defending unit (`DU`) during the `AU` o
 
 The attack consists of two phases:
 
- 1. `AU` damage to `DU`
- 2. `DU` damage to `AU`
+ 1. Strike
+ 2. Counter-strike
 
-#### `AU` damage to `DU` ####
+#### Strike ####
 
 During this phase, `AU` deals some damage to `DU`. The amount of damage is subtracted from the HP of `DU`, and is:
 
@@ -103,7 +123,7 @@ During this phase, `AU` deals some damage to `DU`. The amount of damage is subtr
 
 At least one point of damage is always dealt.
 
-#### `DU` damage to `AU` ####
+#### Counter-strike ####
 
 During this phase, `DU` deals some damage back to to `AU`. This phase only happens if:
 
@@ -227,7 +247,7 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
    - neutral units - capture?
    - capture - not instant - building HP, capture consecutively with single unit
      - capture - first into neutral (half the time), then into own
-   - action - click to show action stats + button
+   - action stats in modals
  - model / view architecture
    - model - game, map, units, etc, with no link to the view
      - easily extendable to AIs, local MP or even MP-over-server
