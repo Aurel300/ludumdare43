@@ -26,9 +26,9 @@ class GSGame extends JamState {
     B_GAME = amB("game").fluent;
     B_PAL = Vector.fromArrayCopy([ for (i in 0...15 * 9) B_GAME.get(64 + (i % 15) * 2, 72 + (i / 15).floor() * 4) ]);
     var grays = Vector.fromArrayCopy(B_PAL.toArray().slice(0, 13));
-    B_PLAYER_COLOURS = Vector.fromArrayCopy([B_PAL[11]].concat([ for (i in 0...4) B_PAL[29 + i * 30] ]));
-    B_PLAYER_COLOURS_DARK = Vector.fromArrayCopy([B_PAL[5]].concat([ for (i in 0...4) B_PAL[31 + i * 30] ]));
-    B_TERRAIN = Vector.fromArrayCopy([ for (i in 0...(cast Terrain.TTVoid:Int) + 1)
+    B_PLAYER_COLOURS = Vector.fromArrayCopy([B_PAL[11]].concat([ for (i in 0...4) B_PAL[29 + i * 15] ]));
+    B_PLAYER_COLOURS_DARK = Vector.fromArrayCopy([B_PAL[5]].concat([ for (i in 0...4) B_PAL[16 + i * 15] ]));
+    B_TERRAIN = Vector.fromArrayCopy([ for (i in 0...(cast Terrain.TTNone:Int) + 1)
         Vector.fromArrayCopy([ for (j in 0...(cast i:Terrain).variations())
             B_GAME >> new Cut(i * 24, j * 18, 23, 18)
           ])
@@ -40,7 +40,7 @@ class GSGame extends JamState {
           var c = vec[i];
           if (c.isTransparent) continue;
           var closest = Colour.quantise(c, grays);
-          vec[i] = B_PAL[15 + (player - 1) * 30 + closest];
+          vec[i] = B_PAL[15 + (player - 1) * 15 + closest];
         }
         b.setVector(vec);
       }
@@ -53,7 +53,7 @@ class GSGame extends JamState {
             b;
           } ])
       ]);
-    B_UNITS = Vector.fromArrayCopy([ for (i in 0...(cast UnitType.Monkey:Int) + 1)
+    B_UNITS = Vector.fromArrayCopy([ for (i in 0...(cast UnitType.Medusa:Int) + 1)
         Vector.fromArrayCopy([ for (player in 0...5)
             recolour(B_GAME >> new Cut(0, 80 + i * 24, 32, 24), player)
             //B_GAME >> new Cut(0, 80 + i * 24, 32, 24) << new GlowBox(c)

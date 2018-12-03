@@ -9,6 +9,7 @@ class MapRenderer {
   public var range:Array<Tile> = [];
   public var actions:Array<UnitAction> = [];
   public var rangeColour:Int = 0;
+  public var hideNone:Bool = true;
   
   public var hpBarShow = new Bitween(15, true);
   
@@ -125,6 +126,7 @@ class MapRenderer {
     for (sti in tilesSorted) {
       var tile = map.tiles[sti];
       if (tile != null) {
+        if (hideNone && tile.terrain == TTNone) continue;
         var screenPos = tile.position.toPixel(camAngle);
         var rangeIndex = range.indexOf(tile);
         if (rangeIndex != -1) screenPos.y--;

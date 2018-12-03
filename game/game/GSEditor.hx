@@ -15,6 +15,7 @@ class GSEditor extends JamState {
   var brush:Int = 0;
   var selectedOwner:Player = null;
   var players:Array<Player>;
+  var action:EditorAction = None;
   
   function mkTile(x:Int, y:Int):Tile return new Tile(selectedTerrain, FM.prng.nextMod(selectedTerrain.variations()), {x: x, y: y}, map);
   
@@ -34,6 +35,7 @@ class GSEditor extends JamState {
       for (i in 0...map.tiles.length) map.tiles[i] = mkTile(i % map.width, (i / map.width).floor());
     }
     mapRenderer = new MapRenderer(map);
+    mapRenderer.hideNone = false;
   }
   
   override public function keyUp(k:Key):Void {
@@ -85,6 +87,7 @@ class GSEditor extends JamState {
             case KeyV: TTMountain;
             case KeyB: TTWater;
             case KeyN: TTVoid;
+            case KeyM: TTNone;
             case _: return;
           });
         case EMBuilding: selectedBuilding = (switch (k) {
@@ -161,36 +164,51 @@ class GSEditor extends JamState {
     
     mapRenderer.renderMap(ab, app.mouse.x, app.mouse.y);
     
+    var mx = app.mouse.x;
+    var my = app.mouse.y;
+    action = None;
+    function button(b:Bitmap, x:Int, y:Int, ea:EditorAction):Void {
+      var mover = action == None && mx.withinI(x, x + b.width) && my.withinI(y, y + b.height);
+      ab.blitAlpha(b, x, y - (mover ? 1 : 0));
+      if (mover) action = ea;
+    }
     // UI
     switch (mode) {
       case EMTerrain:
-      for (i in 0...6) {
-        ab.blitAlpha(
+      for (i in 0...7) {
+        button(
              GSGame.B_TERRAIN[(cast i:Terrain)][0]
             ,8 + i * 18
             ,300 - 20 - ((cast i:Terrain) == selectedTerrain ? 4 : 0)
+            ,SelectTerrain((cast i:Terrain))
           );
       }
       case EMBuilding:
       for (i in 0...7) {
-        ab.blitAlpha(
+        button(
              GSGame.B_BUILDINGS[(cast i:BuildingType)][selectedOwner.playerColour()]
             ,3 + i * 18
             ,300 - 34 - ((cast i:BuildingType) == selectedBuilding ? 4 : 0)
+            ,SelectBuilding((cast i:BuildingType))
           );
       }
       case EMUnit:
-      for (i in 0...7) {
-        ab.blitAlpha(
-             GSGame.B_UNITS[(cast i:UnitType)][selectedOwner.playerColour()]
-            ,3 + i * 18
-            ,300 - 26 - ((cast i:UnitType) == selectedUnit ? 4 : 0)
-          );
+      for (j in 0...3) {
+        for (i in 0...7) {
+          if (i + j * 7 > 16) break;
+          button(
+               GSGame.B_UNITS[(cast (i + j * 7):UnitType)][selectedOwner.playerColour()]
+              ,3 + i * 18
+              ,300 - 50 + j * 25 - 26 - ((cast (i + j * 7):UnitType) == selectedUnit ? 4 : 0)
+              ,SelectUnit((cast (i + j * 7):UnitType))
+            );
+        }
       }
     }
   }
   
   function brushTick():Void {
+    if (action != None) return;
     var tile = mapRenderer.mouseToTile(app.mouse.x, app.mouse.y);
     if (tile == null) return;
     switch (mode) {
@@ -215,11 +233,26 @@ class GSEditor extends JamState {
   }
   
   override public function mouseDown(mx:Int, my:Int):Void { mouseHeld = true; brushTick(); }
-  override public function mouseUp(mx:Int, my:Int):Void mouseHeld = false;
+  override public function mouseUp(mx:Int, my:Int):Void {
+    switch (action) {
+      case SelectTerrain(t): selectedTerrain = t;
+      case SelectBuilding(t): selectedBuilding = t;
+      case SelectUnit(t): selectedUnit = t;
+      case _:
+    }
+    mouseHeld = false;
+  }
   override public function mouseMove(mx:Int, my:Int):Void {
-    if (!mouseHeld || mode != EMTerrain) return;
+    if (!mouseHeld || mode != EMTerrain || action != None) return;
     brushTick();
   }
+}
+
+enum EditorAction {
+  None;
+  SelectTerrain(t:Terrain);
+  SelectBuilding(t:BuildingType);
+  SelectUnit(t:UnitType);
 }
 
 enum EditorMode {

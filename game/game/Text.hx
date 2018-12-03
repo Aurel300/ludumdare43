@@ -15,15 +15,15 @@ class Text {
   public static function load(am:AssetManager):Void {
     fonts = [
          font.FontNS.initAuto(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
-        ,font.FontNS.initAuto(am, GSGame.B_PAL[0 * 30 + 15 + 10], GSGame.B_PAL[0 * 30 + 15 + 7], GSGame.B_PAL[0 * 30 + 15 + 4])
-        ,font.FontNS.initAuto(am, GSGame.B_PAL[1 * 30 + 15 + 10], GSGame.B_PAL[1 * 30 + 15 + 7], GSGame.B_PAL[1 * 30 + 15 + 4])
-        ,font.FontNS.initAuto(am, GSGame.B_PAL[2 * 30 + 15 + 10], GSGame.B_PAL[2 * 30 + 15 + 7], GSGame.B_PAL[2 * 30 + 15 + 4])
-        ,font.FontNS.initAuto(am, GSGame.B_PAL[3 * 30 + 15 + 10], GSGame.B_PAL[3 * 30 + 15 + 7], GSGame.B_PAL[3 * 30 + 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[1 * 15 + 10], GSGame.B_PAL[1 * 15 + 7], GSGame.B_PAL[1 * 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[2 * 15 + 10], GSGame.B_PAL[2 * 15 + 7], GSGame.B_PAL[2 * 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[3 * 15 + 10], GSGame.B_PAL[3 * 15 + 7], GSGame.B_PAL[3 * 15 + 4])
+        ,font.FontNS.initAuto(am, GSGame.B_PAL[4 * 15 + 10], GSGame.B_PAL[4 * 15 + 7], GSGame.B_PAL[4 * 15 + 4])
         ,font.FontBasic3x9.init(am, GSGame.B_PAL[10], GSGame.B_PAL[7], GSGame.B_PAL[4])
-        ,font.FontBasic3x9.init(am, GSGame.B_PAL[0 * 30 + 15 + 10], GSGame.B_PAL[0 * 30 + 15 + 7], GSGame.B_PAL[0 * 30 + 15 + 4])
-        ,font.FontBasic3x9.init(am, GSGame.B_PAL[1 * 30 + 15 + 10], GSGame.B_PAL[1 * 30 + 15 + 7], GSGame.B_PAL[1 * 30 + 15 + 4])
-        ,font.FontBasic3x9.init(am, GSGame.B_PAL[2 * 30 + 15 + 10], GSGame.B_PAL[2 * 30 + 15 + 7], GSGame.B_PAL[2 * 30 + 15 + 4])
-        ,font.FontBasic3x9.init(am, GSGame.B_PAL[3 * 30 + 15 + 10], GSGame.B_PAL[3 * 30 + 15 + 7], GSGame.B_PAL[3 * 30 + 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[1 * 15 + 10], GSGame.B_PAL[1 * 15 + 7], GSGame.B_PAL[1 * 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[2 * 15 + 10], GSGame.B_PAL[2 * 15 + 7], GSGame.B_PAL[2 * 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[3 * 15 + 10], GSGame.B_PAL[3 * 15 + 7], GSGame.B_PAL[3 * 15 + 4])
+        ,font.FontBasic3x9.init(am, GSGame.B_PAL[4 * 15 + 10], GSGame.B_PAL[4 * 15 + 7], GSGame.B_PAL[4 * 15 + 4])
       ];
   }
   /*

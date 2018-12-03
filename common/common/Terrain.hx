@@ -8,6 +8,7 @@ abstract Terrain(Int) from Int to Int {
   var TTMountain = 3;
   var TTWater = 4;
   var TTVoid = 5;
+  var TTNone = 6;
 }
 
 class TerrainTools {
@@ -23,12 +24,12 @@ class TerrainTools {
       case TTDesert: Num(2);
       case TTHill: Num(2);
       case TTMountain: Num(3);
-      case TTWater: Inf;
-      case TTVoid: Inf;
+      case _: Inf;
     };
   
   public static function tdfF(of:Terrain):InfInt return switch (of) {
       case TTMountain: Num(2);
+      case TTNone: Inf;
       case _: Num(1);
     };
   
