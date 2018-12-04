@@ -130,7 +130,7 @@ class UnitTypeTools {
         ,STL: stats.STL
         ,tier: stats.tier
         ,capture: db(stats.capture)
-        ,maxCount: stats.maxCount != null ? stats.maxCount : -1
+        ,maxCount: stats.maxCount != null ? stats.maxCount : 4
         ,moved: false
         ,acted: false
         ,defended: false

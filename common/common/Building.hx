@@ -37,16 +37,23 @@ class Building {
   }
   
   public function summariseBuild(of:UnitType) {
+    var count = 0;
+    for (t in tile.map.tiles) {
+      for (u in t.units) if (u.type == of && u.owner == owner) count++;
+    }
+    
     var stats = of.stats(null);
     var suffCost = owner.cycles >= stats.CYC;
     var suffTier = owner.tier >= stats.tier;
+    var ltMax = count < stats.maxCount;
     var space = tile.units.length == 0;
     
     return {
-         canBuild: suffCost && suffTier && space
+         canBuild: suffCost && suffTier && space && ltMax
         ,suffCost: suffCost
         ,suffTier: suffTier
         ,space: space
+        ,ltMax: ltMax
         ,cost: stats.CYC
       };
   }

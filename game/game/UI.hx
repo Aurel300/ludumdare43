@@ -320,7 +320,10 @@ class UI {
       Text.render(to, 178, 4, 'Time left in turn: ${Std.int(Game.I.turnTimer / 60)}');
       Text.render(to, 4, 14,
         '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+${localController.activePlayer.lastCycleGain})'
-        + '\n${Text.t(Small)}FAV: ${localController.activePlayer.favour}/${Player.FAVOUR_LIMIT}'
+        + (
+          localController.activePlayer.favour >= Player.FAVOUR_LIMIT
+          ? '\n${Text.t(SmallYellow)}GOD FAVOUR ACHIEVED!'
+          : '\n${Text.t(Small)}FAV: ${localController.activePlayer.favour}/${Player.FAVOUR_LIMIT}')
         );
     }
     
@@ -424,6 +427,7 @@ class UI {
               + (!build.suffCost ? '\n${Text.t(SmallRed)}(INSUFFICIENT CYCLES)' : '\n${Text.t(SmallYellow)}(COST: ${build.cost} CYCLES)')
               + (!build.suffTier ? '\n${Text.t(SmallRed)}(INSUFFICIENT TIER)' : '')
               + (!build.space ? '\n${Text.t(SmallRed)}(NO SPACE FOR UNIT)' : '')
+              + (!build.ltMax ? '\n${Text.t(SmallRed)}(UNIT LIMIT REACHED)' : '')
               ;
               showModal(
                 build.canBuild ? () -> {

@@ -221,17 +221,17 @@ Active abilities have a 30 point charge-up.
 | Faction | God | Characteristic / effect |
 | ------- | --- | -------------- |
 | Juggernauts | Ares | Destruction |
-| | - passive | +1 `ATK` on siege and charge units |
+| | - passive | +1 `ATK` on siege and charge units. |
 | | - active | Siege units are no longer have siege modifier. Charge adds twice as much damage. |
 | Harlequins | Dionysus | Trickery, Confusion?, Charm? |
-| | - passive | All flying units can capture |
-| | - active | All units can capture, Flying units have +1 `DEF` |
+| | - passive | All flying units can capture. |
+| | - active | All units can capture. Flying units have +1 `DEF`. |
 | Zephyrs | Hermes | Teleportation / transport |
-| | - passive | All units have desert and hill affinity |
-| | - active | Every unit gains +1 max `MP` |
+| | - passive | All units have desert and hill affinity. |
+| | - active | Every unit gains +1 max `MP`. Ground units have +1 `DEF`. |
 | Reapers | Hades | Death? Stasis? |
-| | - passive | Monkeys, Bats, Frogs have 4 `DEF` |
-| | - active | Thorn defense (any damage cancelled by `DEF` is dealt back to the attacker) |
+| | - passive | Monkeys, Bats, Frogs have 4 `DEF`. |
+| | - active | Thorn defense (any damage cancelled by `DEF` is dealt back to the attacker). Wolves and Spiders have +1 `DEF`. |
 
 ## TODO ##
 
