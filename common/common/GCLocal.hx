@@ -46,6 +46,8 @@ class GCLocal implements GameController {
         var capture = u.summariseCapture(target);
         if (capture.captured) queuedUpdates.push(CaptureBuilding(u, target, capture.capture));
         else queuedUpdates.push(CapturingBuilding(u, target, capture.capture, capture.progress));
+        case CaptureUnit(target):
+        queuedUpdates.push(CaptureUnit(u, target));
         case AttackNoDamage(_):
       }
     }
@@ -158,6 +160,11 @@ class GCLocal implements GameController {
       if (b.owner != null) b.owner.recomputeVision(g.map.tiles);
       u.stats.captureTimer = 0;
       b.owner = (b.owner == null ? u.owner : null);
+      case CaptureUnit(u, target):
+      target.stats.MP = 0;
+      target.stats.moved = true;
+      target.stats.acted = true;
+      target.owner = u.owner;
       case CapturingBuilding(u, b, _, prog):
       u.stats.captureTimer = prog;
       case BuildUnit(ut, at, cost):

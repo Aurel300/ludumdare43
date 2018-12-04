@@ -30,6 +30,10 @@ class Unit {
           Pathfinding.getReach(tile, null, stats.RNG)
             .filter(t -> t.units.length != 0 && canAttack(t.units[0], true))
             .map(t -> damageTo(t.units[0], true) > 0 ? UnitAction.Attack(t.units[0]) : UnitAction.AttackNoDamage(t.units[0]))
+        ).concat(
+          Pathfinding.getReach(tile, null, stats.RNG)
+            .filter(t -> t.units.length != 0 && canCaptureUnit(t.units[0]))
+            .map(t -> UnitAction.CaptureUnit(t.units[0]))
         );
     }
     if (tile.buildings.length > 0 && canCapture(tile.buildings[0])) {
@@ -138,6 +142,13 @@ class Unit {
     return target.tile.position.equals(tile.position)
       && stats.capture
       && target.owner != owner;
+  }
+  
+  public function canCaptureUnit(target:Unit):Bool {
+    var dist = target.tile.position.distance(tile.position);
+    return dist == 1
+      && target.owner == null
+      && stats.capture;
   }
   
   public function baseAttack():Int {

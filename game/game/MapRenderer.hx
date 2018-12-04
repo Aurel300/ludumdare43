@@ -180,6 +180,7 @@ class MapRenderer {
           case Attack(target): frame = 0; target.tile.position;
           case Repair(target): frame = 1; target.tile.position;
           case Capture(target): frame = 2; target.tile.position;
+          case CaptureUnit(target): frame = 2; target.tile.position;
           case AttackNoDamage(target): frame = 3; target.tile.position;
         });
       var screenPos = tilePosition.toPixel(camAngle);

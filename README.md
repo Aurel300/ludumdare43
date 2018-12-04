@@ -238,7 +238,6 @@ Active abilities have a 30 point charge-up.
  - sacrifices
  - fix camera turning
  - factions
- - neutral units captured
  - main menu
  
  

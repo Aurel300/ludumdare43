@@ -205,7 +205,7 @@ class UI {
       selectTile(u.tile);
       u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
       case RemoveUnit(u): deselect(); done();
-      case TurnUnit(_) | BuildUnit(_, _, _): done();
+      case TurnUnit(_) | BuildUnit(_, _, _) | CaptureUnit(_): done();
       case GameOver(w):
       mGameOver.show.setTo(true);
       mGameOver.winner = w;
@@ -308,8 +308,8 @@ class UI {
     // top status bar
     if (localController.activePlayer != null) {
       Text.render(to, 4, 4,
-        '${Text.tp(localController.activePlayer)}${localController.activePlayer.name}${Text.t(Small)}\'s turn'
-        + ' (${Std.int(Game.I.turnTimer / 60)})');
+        '${Text.tp(localController.activePlayer)}${localController.activePlayer.name}${Text.t(Small)}\'s turn');
+      Text.render(to, 178, 4, 'Time left in turn: ${Std.int(Game.I.turnTimer / 60)}');
       Text.render(to, 4, 14, '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+${localController.activePlayer.lastCycleGain})');
     }
     
@@ -353,7 +353,8 @@ class UI {
   }
   
   function updateRange():Void {
-    if (localController.activePlayer != null) mapRenderer.rangeColour = localController.activePlayer.colourIndex;
+    if (localController.activePlayer == null) return;
+    mapRenderer.rangeColour = localController.activePlayer.colourIndex;
     mapRenderer.actions = [];
     stats.show.setTo(false);
     switch (selection) {
@@ -586,7 +587,7 @@ class UI {
       if (unit.stats.acted) return false;
       if (unit.owner != localController.activePlayer) return false;
       for (action in actions) if (switch (action) {
-          case Attack(u) | Repair(u) | AttackNoDamage(u): u.tile == target;
+          case Attack(u) | Repair(u) | AttackNoDamage(u) | CaptureUnit(u): u.tile == target;
           case Capture(b): b.tile == target;
         }) {
           var confirmAction = () -> localController.queuedActions.push(UnitAction(unit, action));
@@ -622,6 +623,8 @@ class UI {
               + ' ${Text.tp(b.owner)}${b.name}${Text.t(Regular)}'
               + '\n ${Text.t(SmallYellow)}' + (capture.start ? "(START)" : "(CONTINUE)")
               + '\n${Text.t(Regular)} Turns left: ${capture.turnsLeft}';
+              case CaptureUnit(target):
+              'Capture ${Text.tp(target.owner)}${target.name}${Text.t(Regular)}';
             });
           showModal(
                confirmAction
