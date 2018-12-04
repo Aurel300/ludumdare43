@@ -100,6 +100,7 @@ class UI {
   public var mGameOver = {
        show: new Bitween(100, false)
       ,winner: (null:Player)
+      ,quote: ""
     };
   
   public var handlingUpdate:Null<GameUpdate> = null;
@@ -207,8 +208,15 @@ class UI {
       case RemoveUnit(u): deselect(); done();
       case TurnUnit(_) | BuildUnit(_, _, _) | CaptureUnit(_): done();
       case GameOver(w):
+      if (selection != GameOver) Sfx.fanfare();
       mGameOver.show.setTo(true);
       mGameOver.winner = w;
+      mGameOver.quote = [
+           "The sacrifices were not in vain..."
+          ,"And so our god stays satisfied..."
+          ,"A victory, but at what cost...?"
+          ,"And yet, the battle is far from over..."
+        ][FM.prng.nextMod(4)];
       selection = GameOver;
       done();
     }
@@ -310,7 +318,10 @@ class UI {
       Text.render(to, 4, 4,
         '${Text.tp(localController.activePlayer)}${localController.activePlayer.name}${Text.t(Small)}\'s turn');
       Text.render(to, 178, 4, 'Time left in turn: ${Std.int(Game.I.turnTimer / 60)}');
-      Text.render(to, 4, 14, '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+${localController.activePlayer.lastCycleGain})');
+      Text.render(to, 4, 14,
+        '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+${localController.activePlayer.lastCycleGain})'
+        + '\n${Text.t(Small)}FAV: ${localController.activePlayer.favour}/${Player.FAVOUR_LIMIT}'
+        );
     }
     
     // main tooltip
@@ -324,7 +335,8 @@ class UI {
       var gy = 300 - Timing.quartInOut.getI(mGameOver.show.valueF, 150);
       to.blitAlpha(GSGame.B_GAMEOVER, 0, 300 - Timing.quartInOut.getI(mGameOver.show.valueF, 300));
       to.fillRect(0, gy, 500, 40, GSGame.B_PLAYER_COLOURS[mGameOver.winner.playerColour()]);
-      Text.render(to, 250, gy + 10, 'GAME OVER\n' + (mGameOver.winner == null ? "NO WINNER!" : '${mGameOver.winner.name} WINS!'));
+      Text.render(to, 150, gy + 22, 'GAME OVER! ' + (mGameOver.winner == null ? "NO WINNER!" : '${mGameOver.winner.name} WINS!'));
+      Text.render(to, 150, gy + 6, mGameOver.quote);
     }
   }
   
@@ -358,6 +370,13 @@ class UI {
     mapRenderer.actions = [];
     stats.show.setTo(false);
     switch (selection) {
+      case Sacrifice(b, cancel):
+      stats.show.setTo(true);
+      stats.gfx = GSGame.B_STATS[0][0];
+      stats.bg.fill(0);
+      stats.text.fill(0);
+      stats.tooltips = [];
+      Text.render(stats.text, 4, 44, '${Text.t(RegularRed)}Select a sacrifice\n${Text.t(Regular)}Or click here to cancel');
       case BuildGround(b, cancel) | BuildWater(b, cancel) | BuildFlying(b, cancel):
       stats.show.setTo(true);
       stats.gfx = GSGame.B_STATS[0][0];
@@ -517,7 +536,15 @@ class UI {
           case BTTempleTron | BTFactoreon:
           if (b.type == BTTempleTron) {
             emitPerk(4);
-            emitButton(15, 3, () -> selection = Surrender(selection));
+            emitButton(15, 3, () -> showModal(
+                () -> {
+                  localController.queuedActions.push(Surrender);
+                  clearUI();
+                }
+                ,None
+                ,MTCenter
+                ,"Surrender the battle?"
+              ));
             emitButton(16, 4, () -> selection = Sacrifice(b, selection));
           }
           emitButton(12, 0, () -> selection = BuildGround(b, selection));
@@ -589,6 +616,7 @@ class UI {
       for (action in actions) if (switch (action) {
           case Attack(u) | Repair(u) | AttackNoDamage(u) | CaptureUnit(u): u.tile == target;
           case Capture(b): b.tile == target;
+          case Sacrifice: false;
         }) {
           var confirmAction = () -> localController.queuedActions.push(UnitAction(unit, action));
           var text = (switch (action) {
@@ -625,6 +653,7 @@ class UI {
               + '\n${Text.t(Regular)} Turns left: ${capture.turnsLeft}';
               case CaptureUnit(target):
               'Capture ${Text.tp(target.owner)}${target.name}${Text.t(Regular)}';
+              case Sacrifice: "";
             });
           showModal(
                confirmAction
@@ -651,11 +680,30 @@ class UI {
         case SUnit(u): if (!handleUnitOrder(u, target)) selectTile(target);
         case _: selectTile(target);
       }
+      case [Sacrifice(_, cancel), SelectTile(target)]:
+      if (target.units.length > 0
+          && target.units[0].owner == localController.activePlayer) {
+        var unit = target.units[0];
+        var sacrifice = unit.summariseSacrifice();
+        var confirmAction = () -> localController.queuedActions.push(UnitAction(unit, Sacrifice));
+        if (!sacrifice.canSacrifice) confirmAction = null;
+        var text =
+        'Sacrifice ${Text.tp(unit.owner)}${unit.name}${Text.t(Regular)}'
+        + '\n${Text.t(Regular)} REWARD: ${sacrifice.reward}'
+        + (sacrifice.canSacrifice ? '' : '\n ${Text.t(SmallRed)}(ALREADY SACRIFICED\n   THIS TURN)')
+        ;
+        showModal(
+             confirmAction
+            ,selection
+            ,MTTile(target)
+            ,text
+          );
+      }
+      case [Sacrifice(_, cancel), Stats]: selection = cancel;
       case [_, SelectTile(t)]: selectTile(t);
-      case [_, Stats]: return true;
+      case [_, Stats]:
       case [_, StatsTooltip(tt)]:
       if (tt.click != null) tt.click();
-      return true;
       case [_, None]: return false;
     }
     return true;

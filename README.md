@@ -225,7 +225,7 @@ Active abilities have a 30 point charge-up.
 | | - active | Siege units are no longer have siege modifier. Charge adds twice as much damage. |
 | Harlequins | Dionysus | Trickery, Confusion?, Charm? |
 | | - passive | All flying units can capture |
-| | - active | All units can capture |
+| | - active | All units can capture, Flying units have +1 `DEF` |
 | Zephyrs | Hermes | Teleportation / transport |
 | | - passive | All units have desert and hill affinity |
 | | - active | Every unit gains +1 max `MP` |
@@ -235,10 +235,9 @@ Active abilities have a 30 point charge-up.
 
 ## TODO ##
 
- - sacrifices
- - fix camera turning
  - factions
  - main menu
+ - fix camera turning
  
  
  

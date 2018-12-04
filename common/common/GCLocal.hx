@@ -9,7 +9,10 @@ class GCLocal implements GameController {
   
   public function beginGame(g:Game):Void {
     queuedUpdates = [];
-    for (p in g.players) p.cycles = Player.INIT_CYCLES;
+    for (p in g.players) {
+      p.cycles = Player.INIT_CYCLES;
+      p.favour = 0;
+    }
   }
   
   public function tick(g:Game):Void {
@@ -49,6 +52,11 @@ class GCLocal implements GameController {
         case CaptureUnit(target):
         queuedUpdates.push(CaptureUnit(u, target));
         case AttackNoDamage(_):
+        case Sacrifice:
+        var sacrifice = u.summariseSacrifice();
+        u.owner.favour += sacrifice.reward;
+        u.owner.sacrificed = true;
+        queuedUpdates.push(RemoveUnit(u));
       }
     }
     function handleBuild(ut:UnitType, at:Building):Void {
@@ -65,6 +73,7 @@ class GCLocal implements GameController {
         p.tier = 0;
         p.lastCycleGain = 0;
         p.lost = true;
+        p.sacrificed = false;
         p.recomputeVision(g.map.tiles);
         for (tile in g.map.tiles) {
           for (building in tile.buildings) {
@@ -97,6 +106,7 @@ class GCLocal implements GameController {
           case MoveUnit(u, to): handleMoveUnit(u, to);
           case UnitAction(u, action): handleUnitAction(u, action);
           case Build(ut, at): handleBuild(ut, at);
+          case Surrender: p.lost = true; g.state = FinishingTurn(p); continue;
           case EndTurn: g.state = FinishingTurn(p); continue;
         }
         PlayerTurn(p, t - 1);
@@ -148,8 +158,8 @@ class GCLocal implements GameController {
       if (!attacking) u.stats.defended = true;
       target.stats.HP -= dmg;
       case RemoveUnit(u):
-      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       u.tile.units.remove(u);
+      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       case RepairUnit(_, target, rep):
       target.stats.HP += rep;
       case TurnUnit(u):

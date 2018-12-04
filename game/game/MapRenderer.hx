@@ -182,6 +182,7 @@ class MapRenderer {
           case Capture(target): frame = 2; target.tile.position;
           case CaptureUnit(target): frame = 2; target.tile.position;
           case AttackNoDamage(target): frame = 3; target.tile.position;
+          case Sacrifice: continue;
         });
       var screenPos = tilePosition.toPixel(camAngle);
       if (frame == -1) continue;

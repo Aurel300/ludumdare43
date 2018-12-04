@@ -16,6 +16,12 @@ class Sfx {
       ,"Idk_kev"
       ,"Sneaky"
     ];
+  public static var victoryMusic = [
+       "Victory3"
+      ,"Victory4"
+      ,"VictoryFaction2"
+      ,"VictoryQuestionMark"
+    ];
   public static var musicChannel:sk.thenet.plat.js.common.audio.Sound.Channel;
   
   public static function isMusic(s:String):Bool {
@@ -53,11 +59,15 @@ class Sfx {
   static function shuffle():String {
     var c = music.copy();
     c.remove(currentMusic);
-    return c[FM.prng.nextMod(c.length)];
+    return c[Std.random(c.length)];
   }
   
-  public static function startMusic():Void {
-    currentMusic = shuffle();
+  public static function fanfare():Void {
+    startMusic(victoryMusic[Std.random(victoryMusic.length)]);
+  }
+  
+  public static function startMusic(?choice:String):Void {
+    currentMusic = choice != null ? choice : shuffle();
     if (musicChannel != null) musicChannel.stop();
     musicChannel = (cast play("music_" + currentMusic));
     musicChannel.setVolume(GSGame.musicOn ? 1 : 0);

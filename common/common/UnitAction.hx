@@ -6,4 +6,5 @@ enum UnitAction {
   Capture(target:Building);
   CaptureUnit(target:Unit);
   AttackNoDamage(target:Unit);
+  Sacrifice;
 }

@@ -2,12 +2,15 @@ package common;
 
 class Player {
   public static final INIT_CYCLES = 6;
+  public static final FAVOUR_LIMIT = 15;
   
   public var name:String;
   public var colourIndex:Int = 2;
   public var faction:Faction;
   public var controller:PlayerController;
   public var cycles:Int;
+  public var favour:Int = 0;
+  public var sacrificed:Bool = false;
   public var lastCycleGain:Int = 0;
   public var tier:Int = 0;
   public var lost:Bool = false;

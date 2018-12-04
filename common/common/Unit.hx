@@ -14,6 +14,7 @@ class Unit {
   public var prevHealth:Int = 0;
   public var hurtTimer:Int = 0;
   public var actionRelevant:Bool = false;
+  public var cyclesDestroyed = 0;
   
   public var accessibleTiles(get, never):Array<Tile>;
   private function get_accessibleTiles():Array<Tile> {
@@ -116,6 +117,14 @@ class Unit {
         ,progress: progress
         ,turnsLeft: target.captureCost - stats.captureTimer
         ,capture: target.owner == null
+      };
+  }
+  
+  public function summariseSacrifice() {
+    var reward = (stats.CYC >> 1).maxI(cyclesDestroyed);
+    return {
+         reward: reward
+        ,canSacrifice: !owner.sacrificed
       };
   }
   
