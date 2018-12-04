@@ -8,7 +8,15 @@ class Sfx {
   static var am:AssetManager;
   
   //static var music:Map<String, Crossfade>;
-  public static var currentMusic:String = "";
+  public static var currentMusic:String = "ActuallyGood";
+  public static var music = [
+       "ActuallyGood"
+      ,"Angelic"
+      ,"Final"
+      ,"Idk_kev"
+      ,"Sneaky"
+    ];
+  public static var musicChannel:sk.thenet.plat.js.common.audio.Sound.Channel;
   
   public static function isMusic(s:String):Bool {
     return s.startsWith("theme");
@@ -42,7 +50,24 @@ class Sfx {
     return am.getSound(s).play(forever ? Forever : Once, shouldPlay ? volume : 0);
   }
   
+  static function shuffle():String {
+    var c = music.copy();
+    c.remove(currentMusic);
+    return c[FM.prng.nextMod(c.length)];
+  }
+  
+  public static function startMusic():Void {
+    currentMusic = shuffle();
+    if (musicChannel != null) musicChannel.stop();
+    musicChannel = (cast play("music_" + currentMusic));
+    musicChannel.setVolume(GSGame.musicOn ? 1 : 0);
+  }
+  
   public static function tick():Void {
+    musicChannel.setVolume(GSGame.musicOn ? 1 : 0);
+    if (!musicChannel.playing) {
+      startMusic();
+    }
     //if (music != null) for (k in music.keys()) music[k].tick(currentMusic == k);
   }
 }

@@ -182,10 +182,11 @@ class GSGame extends JamState {
   }
   
   override public function to():Void {
-    
+    Sfx.startMusic();
   }
   
   override public function tick():Void {
+    Sfx.tick();
     // controls
     mapRenderer.camX -= 3.negposF(ak(KeyA) || ak(ArrowLeft), ak(KeyD) || ak(ArrowRight));
     mapRenderer.camY -= 3.negposF(ak(KeyW) || ak(ArrowUp), ak(KeyS) || ak(ArrowDown));

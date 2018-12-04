@@ -240,6 +240,9 @@ Active abilities have a 30 point charge-up.
  - factions
  - neutral units captured
  - main menu
+ 
+ 
+ 
  - multiplayer hahaaa
  - larger tiles (outline against same colour???)
  - fullscreen
@@ -247,5 +250,4 @@ Active abilities have a 30 point charge-up.
  - model
    - AI?
  - audio
-   - add music
    . create sfx

@@ -43,9 +43,47 @@ class Main extends Application {
             ,Embed.getSound("hit_swordfish", "wav/hit_swordfish.wav")
             ,Embed.getSound("hit_wolf", "wav/hit_wolf.wav")
             ,Embed.getSound("repair", "wav/repair.wav")
+            ,Embed.getSound("music_ActuallyGood", "music/ActuallyGood.mp3")
+            ,Embed.getSound("music_Angelic", "music/Angelic.mp3")
+            ,Embed.getSound("music_Final", "music/Final.mp3")
+            ,Embed.getSound("music_Idk_kev", "music/Idk_kev.mp3")
+            ,Embed.getSound("music_Intro", "music/Intro.mp3")
+            ,Embed.getSound("music_Menu", "music/Menu.mp3")
+            ,Embed.getSound("music_Sneaky", "music/Sneaky.mp3")
+            ,Embed.getSound("music_Victory3", "music/Victory3.mp3")
+            ,Embed.getSound("music_Victory4", "music/Victory4.mp3")
+            ,Embed.getSound("music_VictoryFaction2", "music/VictoryFaction2.mp3")
+            ,Embed.getSound("music_VictoryQuestionMark", "music/VictoryQuestionMark.mp3")
             
             ,new AssetBind([
-              "hit_bombardierant", "hit_bull", "hit_bumblebee", "hit_chamois", "hit_default", "hit_eagle", "hit_frog", "hit_hog", "hit_medusa", "hit_mosquito", "hit_octopus", "hit_snake", "hit_spider", "hit_squid", "hit_swordfish", "hit_wolf", "repair"
+               "hit_bombardierant"
+              ,"hit_bull"
+              ,"hit_bumblebee"
+              ,"hit_chamois"
+              ,"hit_default"
+              ,"hit_eagle"
+              ,"hit_frog"
+              ,"hit_hog"
+              ,"hit_medusa"
+              ,"hit_mosquito"
+              ,"hit_octopus"
+              ,"hit_snake"
+              ,"hit_spider"
+              ,"hit_squid"
+              ,"hit_swordfish"
+              ,"hit_wolf"
+              ,"repair"
+              ,"music_ActuallyGood"
+              ,"music_Angelic"
+              ,"music_Final"
+              ,"music_Idk_kev"
+              ,"music_Intro"
+              ,"music_Menu"
+              ,"music_Sneaky"
+              ,"music_Victory3"
+              ,"music_Victory4"
+              ,"music_VictoryFaction2"
+              ,"music_VictoryQuestionMark"
             ], (am, _) -> { Sfx.init(am); false; })
             
             ,new AssetTrigger("gameA", ["game"], (am, _) -> { GSGame.load(am.getBitmap); false; })
