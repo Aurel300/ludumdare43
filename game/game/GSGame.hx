@@ -27,6 +27,7 @@ class GSGame extends JamState {
   public static var B_UI_ICONS:haxe.ds.Map<String, FluentBitmap>;
   public static var B_END_TURN:Vector<FluentBitmap>;
   public static var B_GAMEOVER:Bitmap;
+  public static var B_FOW:Bitmap;
   
   public static var RANGE_BORDERS_X = [0,  5,  17, 17, 5,  0];
   public static var RANGE_BORDERS_W = [6,  12, 6,  6,  12, 6];
@@ -147,6 +148,7 @@ class GSGame extends JamState {
     var v = B_GAMEOVER.getVector();
     for (i in 0...v.length) v[i] = i % 2 == 0 ? B_PAL[0] : 0;
     B_GAMEOVER.setVector(v);
+    B_FOW = B_GAME >> new Cut(168, 64, 23, 12);
   }
   
   public static function makeUIBox(to:Bitmap, x:Int, y:Int, w:Int, h:Int):Void {
@@ -163,7 +165,7 @@ class GSGame extends JamState {
   public function new(app) {
     I = this;
     super("game", app);
-    initMap(Map.MAPS["tutorial"]);
+    initMap(Map.MAPS["desert_agony"]);
   }
   
   public function initMap(mf:haxe.io.Bytes):Void {

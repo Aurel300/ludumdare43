@@ -9,6 +9,7 @@ class GCLocal implements GameController {
   
   public function beginGame(g:Game):Void {
     queuedUpdates = [];
+    for (p in g.players) p.cycles = Player.INIT_CYCLES;
   }
   
   public function tick(g:Game):Void {
@@ -62,6 +63,7 @@ class GCLocal implements GameController {
         p.tier = 0;
         p.lastCycleGain = 0;
         p.lost = true;
+        p.recomputeVision(g.map.tiles);
         for (tile in g.map.tiles) {
           for (building in tile.buildings) {
             if (building.owner != p) continue;
@@ -135,6 +137,7 @@ class GCLocal implements GameController {
     var update = queuedUpdates.shift();
     switch (update) {
       case MoveUnit(u, from, to, cost):
+      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       u.tile.units.remove(u);
       u.tile = g.map.get(to);
       u.tile.units.push(u);
@@ -143,18 +146,23 @@ class GCLocal implements GameController {
       if (!attacking) u.stats.defended = true;
       target.stats.HP -= dmg;
       case RemoveUnit(u):
+      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       u.tile.units.remove(u);
       case RepairUnit(_, target, rep):
       target.stats.HP += rep;
       case TurnUnit(u):
+      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       u.owner = null;
       case CaptureBuilding(u, b, _):
+      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
+      if (b.owner != null) b.owner.recomputeVision(g.map.tiles);
       u.stats.captureTimer = 0;
       b.owner = (b.owner == null ? u.owner : null);
       case CapturingBuilding(u, b, _, prog):
       u.stats.captureTimer = prog;
       case BuildUnit(ut, at, cost):
       var u = new Unit(ut, at.tile, at.owner);
+      if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       at.tile.units.push(u);
       if (ut == Hog) u.stats.HP = 1;
       u.stats.MP = 0;

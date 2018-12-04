@@ -236,11 +236,12 @@ Active abilities have a 30 point charge-up.
 ## TODO ##
 
  - sacrifices
- - larger tiles (outline against same colour???)
+ - fix camera turning
+ - factions
  - neutral units captured
  - main menu
- - multiplayer
- - FoW
+ - multiplayer hahaaa
+ - larger tiles (outline against same colour???)
  - fullscreen
  - moved / acted indicator
  - model

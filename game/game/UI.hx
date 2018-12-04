@@ -137,6 +137,8 @@ class UI {
   }
   
   public function tick():Void {
+    mapRenderer.activePlayer = localController.activePlayer;
+    
     // logic
     function mkOff(from:TilePosition, to:TilePosition):TilePosition {
       var fromPixel = from.toPixel(mapRenderer.camAngle);

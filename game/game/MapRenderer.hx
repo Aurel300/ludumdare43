@@ -3,6 +3,7 @@ package game;
 class MapRenderer {
   static final TURN_TIME = 25;
   
+  public var activePlayer:Player;
   public var camX:Float = 50;
   public var camY:Float = 100;
   public var camAngle:Float = 0;
@@ -125,6 +126,7 @@ class MapRenderer {
         if (hideNone && tile.terrain == TTNone) continue;
         var screenPos = tile.position.toPixel(camAngle);
         var rangeIndex = range.indexOf(tile);
+        var visible = activePlayer == null ? true : activePlayer.vision[sti];
         if (rangeIndex != -1) screenPos.y--;
         if (tile.buildings.length > 0) {
           var building = tile.buildings[0];
@@ -151,20 +153,23 @@ class MapRenderer {
               );
           }
         }
-        for (unit in tile.units) {
-          if (unit.hurtTimer > 0) unit.hurtTimer--;
-          if (unit.displayTile != null) {
-            unit.displayTile.offsetUnits.push(unit);
-          } else {
-            renderUnit(unit, tile, screenPos);
+        if (visible) {
+          for (unit in tile.units) {
+            if (unit.hurtTimer > 0) unit.hurtTimer--;
+            if (unit.displayTile != null) {
+              unit.displayTile.offsetUnits.push(unit);
+            } else {
+              renderUnit(unit, tile, screenPos);
+            }
           }
-        }
-        for (unit in tile.offsetUnits) {
-          renderUnit(unit, unit.tile, unit.tile.position.toPixel(camAngle));
+          for (unit in tile.offsetUnits) {
+            renderUnit(unit, unit.tile, unit.tile.position.toPixel(camAngle));
+          }
+        } else {
+          ab.blitAlpha(GSGame.B_FOW, screenPos.x + camXI, screenPos.y + camYI - 3);
         }
         tile.offsetUnits = [];
-        if (tile.terrain == TTWater && FM.prng.nextMod(100) == 0)
-        tile.variation = FM.prng.nextMod(tile.terrain.variations());
+        if (tile.terrain == TTWater && FM.prng.nextMod(100) == 0) tile.variation = FM.prng.nextMod(tile.terrain.variations());
       }
     }
     
