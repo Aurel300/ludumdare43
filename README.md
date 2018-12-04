@@ -214,28 +214,24 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
 
 ### Gods ###
 
+Active abilities have a 30 point charge-up.
+
+ - Sacrificing **unit** - gain `max(floor(CYC / 2), cyclesDestroyed)` points
+
 | Faction | God | Characteristic / effect |
 | ------- | --- | -------------- |
 | Juggernauts | Ares | Destruction |
-| | - passive | bonus to attack? |
-| | - sacrifice **unit** | +2 `ATK` on another unit for 1 turn |
-| | - sacrifice **turn** | ? AoE attack (4 `ATK`, 2-wide hex area) |
-| | - sacrifice **money** | ? |
+| | - passive | +1 `ATK` on siege and charge units |
+| | - active | Siege units are no longer have siege modifier. Charge adds twice as much damage. |
 | Harlequins | Dionysus | Trickery, Confusion?, Charm? |
-| | - passive | bonus to stealth? |
-| | - sacrifice **unit** | +2 `STL` on another unit for 1 turn |
-| | - sacrifice **turn** | ? |
-| | - sacrifice **money** | ? |
+| | - passive | All flying units can capture |
+| | - active | All units can capture |
 | Zephyrs | Hermes | Teleportation / transport |
-| | - passive | bonus to movement? |
-| | - sacrifice **unit** | +2 `MP` on another unit for 1 turn |
-| | - sacrifice **turn** | ? |
-| | - sacrifice **money** | ? |
+| | - passive | All units have desert and hill affinity |
+| | - active | Every unit gains +1 max `MP` |
 | Reapers | Hades | Death? Stasis? |
-| | - passive | units always hit back (even when just killed) |
-| | - sacrifice **unit** | +2 `DEF` on another unit for 1 turn |
-| | - sacrifice **turn** | ? |
-| | - sacrifice **money** | ? |
+| | - passive | Monkeys, Bats, Frogs have 4 `DEF` |
+| | - active | Thorn defense (any damage cancelled by `DEF` is dealt back to the attacker) |
 
 ## TODO ##
 
@@ -243,11 +239,10 @@ As the action of their Temple-tron, a player can perform a ritualistic sacrifice
  - larger tiles (outline against same colour???)
  - neutral units captured
  - main menu
- - MP
- - QA / QoL
-   - RMB - cancel turn
-   - HP bars - toggle with button
-   - moved / acted indicator
+ - multiplayer
+ - FoW
+ - fullscreen
+ - moved / acted indicator
  - model
    - AI?
  - audio

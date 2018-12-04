@@ -60,11 +60,14 @@ class GCLocal implements GameController {
         p.controller.beginTurn(p);
         // TODO: synchronise state if network
         p.tier = 0;
+        p.lastCycleGain = 0;
+        p.lost = true;
         for (tile in g.map.tiles) {
           for (building in tile.buildings) {
             if (building.owner != p) continue;
             switch (building.type) {
-              case BTTempleTron | BTShrine: p.cycles += 7;
+              case BTTempleTron: p.lost = false; p.lastCycleGain += 3;
+              case BTShrine: p.lastCycleGain += 3;
               case BTForge: p.tier++;
               case _:
             }
@@ -77,7 +80,12 @@ class GCLocal implements GameController {
             unit.stats.MP = unit.stats.maxMP;
           }
         }
-        PlayerTurn(p, Game.TURN_TIME);
+        if (p.lost) {
+          FinishingTurn(p);
+        } else {
+          p.cycles += p.lastCycleGain;
+          PlayerTurn(p, Game.TURN_TIME);
+        }
         case PlayerTurn(p, 0): FinishingTurn(p);
         case PlayerTurn(p, t):
         switch (p.controller.pollAction(p)) {
@@ -96,17 +104,34 @@ class GCLocal implements GameController {
             unit.stats.defended = false;
           }
         }
-        // TODO: check victory
-        
         // TODO: synchronise state if network
-        StartingTurn(g.players[(g.players.indexOf(p) + 1) % g.players.length]);
-        //case GameOver(winner):
+        var playing = g.players.filter(p -> !p.lost);
+        if (playing.length <= 1) {
+          queuedUpdates.push(GameOver(playing.length > 0 ? playing[0] : null));
+          GameOver(playing.length > 0 ? playing[0] : null);
+        } else {
+          var i = g.players.indexOf(p);
+          var next = null;
+          for (off in 1...g.players.length) {
+            var cp = g.players[(i + off) % g.players.length];
+            if (playing.indexOf(cp) != -1) {
+              next = cp;
+            }
+          }
+          if (next == null) {
+            queuedUpdates.push(GameOver(null));
+            GameOver(null);
+          } else StartingTurn(g.players[(g.players.indexOf(p) + 1) % g.players.length]);
+        }
+        case GameOver(winner): stop = true; g.state;
         case _: stop = true; g.state;
       });
   }
   
   public function pollUpdate(g:Game):Null<GameUpdate> {
-    if (queuedUpdates.length == 0) return null;
+    if (queuedUpdates.length == 0) {
+      return null;
+    }
     var update = queuedUpdates.shift();
     switch (update) {
       case MoveUnit(u, from, to, cost):
@@ -136,6 +161,7 @@ class GCLocal implements GameController {
       u.stats.moved = true;
       u.stats.acted = true;
       at.owner.cycles -= cost;
+      case GameOver(w):
     }
     return update;
   }

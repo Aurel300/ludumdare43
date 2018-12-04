@@ -9,6 +9,12 @@ class Game {
   public var state:GameState;
   public var controller:GameController;
   
+  public var turnTimer(get, never):Int;
+  private function get_turnTimer():Int return switch (state) {
+      case PlayerTurn(_, timer): timer;
+      case _: 0;
+    };
+  
   public function new(map:Map, players:Array<Player>, controller:GameController) {
     this.map = map;
     this.players = players;

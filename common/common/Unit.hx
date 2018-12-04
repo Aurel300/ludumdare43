@@ -62,7 +62,7 @@ class Unit {
     var willStrike = true;
     var willTurn = stats.medusaGaze;
     var killD = false;
-    var dmgD = 0;
+    var dmgD = target.damageTo(this, false);
     var willCounter = false;
     var killA = false;
     var willSuicide = false;
@@ -75,9 +75,9 @@ class Unit {
     
     if (target.stats.HP - dmgA <= 0) {
       killD = true;
-    } else if (!willTurn && dmgD > 0 && target.canAttack(this, false)) {
+    }
+    if (!willTurn && dmgD > 0 && target.canAttack(this, false)) {
       willCounter = true;
-      dmgD = target.damageTo(this, false);
       if (stats.HP - dmgD <= 0) {
         killA = true;
       }

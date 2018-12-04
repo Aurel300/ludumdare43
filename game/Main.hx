@@ -13,7 +13,10 @@ using sk.thenet.FM;
 using sk.thenet.stream.Stream;
 
 class Main extends Application {
+  public static var I:Main;
+  
   public function new() {
+    I = this;
     super([
          Framerate(60)
         ,Optional(Window("", 1000, 600))
@@ -60,5 +63,9 @@ class Main extends Application {
     addState(new GSGame(this));
     addState(new GSEditor(this));
     mainLoop();
+  }
+  
+  public function st(to:String):Void {
+    applyState(getStateById(to));
   }
 }

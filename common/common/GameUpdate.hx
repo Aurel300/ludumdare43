@@ -9,4 +9,5 @@ enum GameUpdate {
   CaptureBuilding(u:Unit, b:Building, capture:Bool);
   CapturingBuilding(u:Unit, b:Building, capture:Bool, progress:Int);
   BuildUnit(ut:UnitType, at:Building, cost:Int);
+  GameOver(w:Player);
 }

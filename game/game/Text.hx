@@ -62,6 +62,12 @@ class Text {
     return res.fluent >> new Cut(0, 0, res.width, end.y + 6);
   }
   
+  public static function leftOp(txt:String, ?ft:FontType = Regular):Bitmap {
+    var res = Platform.createBitmap(200, 16, 0);
+    var end = fonts[ft].render(res, 0, 0, txt, fonts);
+    return res.fluent >> new Cut(0, 0, end.x + 6, 16);
+  }
+  
   public static function justify(txt:String, width:Int, ?ft:FontType = Regular, ?lh:Int = 16):Bitmap {
     var words = txt.split(" ").map(w -> {
          txt: w

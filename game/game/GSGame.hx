@@ -23,6 +23,10 @@ class GSGame extends JamState {
   public static var B_PERK:Vector<FluentBitmap>;
   public static var B_STATS_BUTTON:Vector<FluentBitmap>;
   public static var B_STATS_ICONS:Vector<FluentBitmap>;
+  public static var B_ICON:Vector<FluentBitmap>;
+  public static var B_UI_ICONS:haxe.ds.Map<String, FluentBitmap>;
+  public static var B_END_TURN:Vector<FluentBitmap>;
+  public static var B_GAMEOVER:Bitmap;
   
   public static var RANGE_BORDERS_X = [0,  5,  17, 17, 5,  0];
   public static var RANGE_BORDERS_W = [6,  12, 6,  6,  12, 6];
@@ -118,6 +122,31 @@ class GSGame extends JamState {
     B_STATS_ICONS = Vector.fromArrayCopy([ for (i in 0...5)
         B_GAME >> new Cut(216 + i * 24, 216, 24, 24)
       ]);
+    B_ICON = Vector.fromArrayCopy([ for (i in 0...2)
+        B_GAME >> new Cut(296 + i * 16, 16, 16, 16)
+      ]);
+    B_UI_ICONS = [
+         "sound_on" => B_GAME >> new Cut(240, 32, 16, 16)
+        ,"sound_off" => B_GAME >> new Cut(256, 32, 16, 16)
+        ,"music_on" => B_GAME >> new Cut(272, 32, 16, 16)
+        ,"music_off" => B_GAME >> new Cut(288, 32, 16, 16)
+        ,"fullscreen" => B_GAME >> new Cut(304, 32, 16, 16)
+        ,"hp" => B_GAME >> new Cut(320, 32, 16, 16)
+        ,"arrow_left" => B_GAME >> new Cut(296, 0, 16, 16)
+        ,"arrow_right" => B_GAME >> new Cut(312, 0, 16, 16)
+        ,"arrow_up" => B_GAME >> new Cut(328, 0, 16, 16)
+        ,"arrow_down" => B_GAME >> new Cut(344, 0, 16, 16)
+        ,"turn_left" => B_GAME >> new Cut(360, 0, 16, 16)
+        ,"turn_right" => B_GAME >> new Cut(376, 0, 16, 16)
+        ,"end_turn" => B_GAME >> new Cut(336, 216, 24, 24)
+      ];
+    B_END_TURN = Vector.fromArrayCopy([ for (i in 0...2)
+        B_GAME >> new Cut(296 + i * 16, 16, 16, 16)
+      ]);
+    B_GAMEOVER = Platform.createBitmap(500, 300, 0);
+    var v = B_GAMEOVER.getVector();
+    for (i in 0...v.length) v[i] = i % 2 == 0 ? B_PAL[0] : 0;
+    B_GAMEOVER.setVector(v);
   }
   
   public static function makeUIBox(to:Bitmap, x:Int, y:Int, w:Int, h:Int):Void {
@@ -151,6 +180,7 @@ class GSGame extends JamState {
   }
   
   override public function to():Void {
+    
   }
   
   override public function tick():Void {
@@ -192,7 +222,7 @@ class GSGame extends JamState {
 }
 
 class RenderTools {
-  public static function playerColour(of:Null<Player>):Colour {
+  public static function playerColour(of:Null<Player>):Int {
     return of == null ? 0 : of.colourIndex;
   }
   

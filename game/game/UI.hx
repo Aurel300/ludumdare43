@@ -11,7 +11,7 @@ class UI {
       ,{has: u -> u.stats.affinity.indexOf(Terrain.TTDesert) != -1, name: '${Text.t(RegularGreen)}Desert affinity', t: "No slowdown in desert."}
       ,{has: u -> u.stats.repair, name: '${Text.t(RegularGreen)}Repair', t: "Can repair friendly units, restoring 2HP per turn."}
       ,{has: u -> u.stats.camouflage, name: '${Text.t(RegularGreen)}Camouflage', t: "STL increased by remaining MOV at the end of turn."}
-      ,{name: '${Text.t(RegularGreen)}Shrine', t: "Provides 7 cycles every turn."}
+      ,{name: '${Text.t(RegularGreen)}Shrine', t: "Provides 3 cycles every turn."}
       ,{name: '${Text.t(RegularGreen)}Forge', t: "Increases production tier by 1."}
       ,{name: '${Text.t(RegularGreen)}Fortress', t: "Adds +1 ATK, +1 DEF, and +1 VIS to any friendly unit on this tile."}
       ,{has: u -> u.stats.charge, name: '${Text.t(RegularRed)}Charge', t: "ATK increased by 1 for each hex tile away from start."}
@@ -55,6 +55,8 @@ class UI {
     }
   }
   
+  var buttons:Array<{x:Int, y:Int, ?big:Bool, icon:String, down:Bool, click:Void->Void, ?hold:Void->Void, tt:String}>;
+  
   public var mapRenderer:MapRenderer;
   public var localController:PCLocal;
   public var gameController:GameController;
@@ -88,6 +90,17 @@ class UI {
       ,text: (null:Bitmap)
       ,tooltips: ([]:Array<Tooltip>)
     };
+  public var mTooltip = {
+       show: new Bitween(10, false)
+      ,y: 300
+      ,text: ""
+      ,lastText: ""
+      ,bg: (null:Bitmap)
+    };
+  public var mGameOver = {
+       show: new Bitween(100, false)
+      ,winner: (null:Player)
+    };
   
   public var handlingUpdate:Null<GameUpdate> = null;
   public var handlingTimer:Int = 0;
@@ -99,6 +112,23 @@ class UI {
     this.localController = localController;
     this.gameController = gameController;
     localController.updateObservers.push(tick);
+    
+    buttons = [
+       {down: false, x: 500 - 16, y: 0, icon: "music", click: () -> GSGame.musicOn = !GSGame.musicOn, tt: "Toggle music"}
+      ,{down: false, x: 500 - 16, y: 16, icon: "sound", click: () -> GSGame.soundOn = !GSGame.soundOn, tt: "Toggle sound"}
+      ,{down: false, x: 500 - 16, y: 32, icon: "fullscreen", click: () -> {}, tt: "Toggle fullscreen"}
+      ,{down: false, x: 150, y: 300 - 16, icon: "hp", click: () -> mapRenderer.hpBarShow.toggle(), tt: "Toggle HP bars"}
+      ,{down: false, x: 166, y: 300 - 16, icon: "arrow_left", click: () -> {}, hold: () -> mapRenderer.camX += 3, tt: "Move camera to the left"}
+      ,{down: false, x: 198, y: 300 - 16, icon: "arrow_right", click: () -> {}, hold: () -> mapRenderer.camX -= 3, tt: "Move camera to the right"}
+      ,{down: false, x: 182, y: 300 - 32, icon: "arrow_up", click: () -> {}, hold: () -> mapRenderer.camY += 3, tt: "Move camera up"}
+      ,{down: false, x: 182, y: 300 - 16, icon: "arrow_down", click: () -> {}, hold: () -> mapRenderer.camY -= 3, tt: "Move camera down"}
+      ,{down: false, x: 166, y: 300 - 32, icon: "turn_left", click: () -> mapRenderer.turnAngle(-1), tt: "Turn camera to the left"}
+      ,{down: false, x: 198, y: 300 - 32, icon: "turn_right", click: () -> mapRenderer.turnAngle(1), tt: "Turn camera to the right"}
+      ,{down: false, x: 500 - 24, y: 300 - 24, big: true, icon: "end_turn", click: () -> {
+          localController.queuedActions.push(EndTurn);
+          clearUI();
+        }, tt: "End turn"}
+    ];
   }
   
   public function clearUI():Void {
@@ -174,6 +204,11 @@ class UI {
       u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
       case RemoveUnit(u): deselect(); done();
       case TurnUnit(_) | BuildUnit(_, _, _): done();
+      case GameOver(w):
+      mGameOver.show.setTo(true);
+      mGameOver.winner = w;
+      selection = GameOver;
+      done();
     }
     
     // modal
@@ -185,13 +220,18 @@ class UI {
         pos.x += mapRenderer.camXI + 16;
         pos.y += mapRenderer.camYI + 24;
         pos;
+        case MTCenter: {x: 250, y: 150};
       });
     modal.w = (modal.targetW * Timing.quartInOut(modal.show.valueF)).round();
     modal.h = (modal.targetH * Timing.quartOut(modal.show.valueF)).round();
     modal.x = (tp.x - (modal.w >> 2)).clampI(0, 500 - modal.w);
     modal.y = (tp.y).clampI(0, 300 - modal.h);
     
+    mTooltip.show.tick();
+    mGameOver.show.tick();
     stats.show.tick();
+    
+    for (b in buttons) if (b.down && b.hold != null) b.hold();
   }
   
   public function render(to:Bitmap, mx:Int, my:Int):Void {
@@ -204,6 +244,17 @@ class UI {
         case StatsTooltip(tt): to.blitAlpha(tt.tt.bg, 0, stats.y - 32);
         case _: to.blitAlpha(stats.text, 0, stats.y - 32);
       }
+    }
+    
+    // buttons
+    for (b in buttons) {
+      var f = b.down ? 1 : 0;
+      to.blitAlpha(b.big != null ? GSGame.B_STATS_BUTTON[f] : GSGame.B_ICON[f], b.x, b.y);
+      to.blitAlpha(GSGame.B_UI_ICONS[switch (b.icon) {
+          case "music": GSGame.musicOn ? "music_on" : "music_off";
+          case "sound": GSGame.soundOn ? "sound_on" : "sound_off";
+          case _: b.icon;
+        }], b.x, b.y);
     }
     
     // show modal
@@ -253,10 +304,26 @@ class UI {
     }
     
     // top status bar
-    Text.render(to, 4, 4,
-      '${Text.tp(localController.activePlayer)}${localController.activePlayer.name}${Text.t(Small)}\'s turn'
-      + ' (0)');
-    Text.render(to, 4, 14, '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+0)');
+    if (localController.activePlayer != null) {
+      Text.render(to, 4, 4,
+        '${Text.tp(localController.activePlayer)}${localController.activePlayer.name}${Text.t(Small)}\'s turn'
+        + ' (${Std.int(Game.I.turnTimer / 60)})');
+      Text.render(to, 4, 14, '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+${localController.activePlayer.lastCycleGain})');
+    }
+    
+    // main tooltip
+    if (!mTooltip.show.isOff && selection != GameOver) {
+      mTooltip.y = 300 - Timing.quartInOut.getI(mTooltip.show.valueF, 16);
+      to.blitAlpha(mTooltip.bg, 500 - 24 - mTooltip.bg.width, mTooltip.y);
+    }
+    
+    // game over text
+    if (!mGameOver.show.isOff) {
+      var gy = 300 - Timing.quartInOut.getI(mGameOver.show.valueF, 150);
+      to.blitAlpha(GSGame.B_GAMEOVER, 0, 300 - Timing.quartInOut.getI(mGameOver.show.valueF, 300));
+      to.fillRect(0, gy, 500, 40, GSGame.B_PLAYER_COLOURS[mGameOver.winner.playerColour()]);
+      Text.render(to, 250, gy + 10, 'GAME OVER\n' + (mGameOver.winner == null ? "NO WINNER!" : '${mGameOver.winner.name} WINS!'));
+    }
   }
   
   function deselect():Void {
@@ -493,6 +560,7 @@ class UI {
     if (handlingUpdate != null) return true;
     switch (mouseAction) {
       case ConfirmModal: modal.confirmHeld = true;
+      case Button(i): buttons[i].down = true;
       case _: return false;
     }
     return true;
@@ -501,6 +569,13 @@ class UI {
   public function mouseUp(mx:Int, my:Int):Bool {
     mouseMove(mx, my);
     modal.confirmHeld = false;
+    
+    if (selection == GameOver) {
+      if (mGameOver.show.isOn) {
+        Main.I.st("editor");
+      }
+      return true;
+    }
     
     if (handlingUpdate != null) return true;
     function handleUnitOrder(unit:Unit, target:Tile):Bool {
@@ -564,6 +639,9 @@ class UI {
     switch [selection, mouseAction] {
       case [_, ConfirmModal]: modal.show.setTo(false); if (modal.confirmAction != null) modal.confirmAction();
       case [_, CancelModal]: modal.show.setTo(false); selection = modal.cancelAction;
+      case [_, Button(i)]:
+      if (buttons[i].down) buttons[i].click();
+      for (b in buttons) b.down = false;
       case [STileBase(_, ts, i), SelectTile(target)]: switch (ts[i]) {
         case SUnit(u): if (!handleUnitOrder(u, target)) selectTile(target);
         case _: selectTile(target);
@@ -579,9 +657,26 @@ class UI {
   }
   
   public function mouseMove(mx:Int, my:Int):Bool {
+    if (selection == GameOver) {
+      mTooltip.show.setTo(false);
+      return false;
+    }
+    
+    function r() {
+      mTooltip.text = (switch (mouseAction) {
+          case Button(i): buttons[i].tt;
+          case _: "";
+        });
+      if (mTooltip.lastText != mTooltip.text) {
+        if (mTooltip.text != "") mTooltip.bg = Text.leftOp(mTooltip.text);
+        mTooltip.lastText = mTooltip.text;
+      }
+      mTooltip.show.setTo(mTooltip.text != "");
+    }
+    
     if (handlingUpdate != null) {
       // CURSOR: hourglass
-      return true;
+      r(); return true;
     }
     mouseAction = None;
     
@@ -593,29 +688,42 @@ class UI {
       } else {
         mouseAction = CancelModal;
       }
-      return true;
+      r(); return true;
     }
     
+    // buttons
+    for (i in 0...buttons.length) {
+      var b = buttons[i];
+      if (mx.withinI(b.x, b.x + (b.big != null ? 24 : 16) - 1)
+        && my.withinI(b.y, b.y + (b.big != null ? 24 : 16) - 1)) {
+        mouseAction = Button(i);
+        r(); return true;
+      }
+    }
+    
+    // stats
     if (mx.withinI(0, stats.bg.width - 1) && my.withinI(stats.y, 300)) {
       mouseAction = Stats;
       for (t in stats.tooltips) {
         if (mx.withinI(t.x, t.x + t.w - 1) && my.withinI(stats.y - 32 + t.y, stats.y - 32 + t.y + t.h - 1)) {
           mouseAction = StatsTooltip(t);
-          return true;
+          r(); return true;
         }
       }
-      return true;
+      r(); return true;
     }
     
     // map interaction
     var tile = mapRenderer.mouseToTile(mx, my);
-    if (tile == null || tile.terrain == TTNone) return false;
+    if (tile == null || tile.terrain == TTNone) {
+      r(); return false;
+    }
     mouseAction = SelectTile(tile);
-    return true;
+    r(); return true;
   }
   
   public function keyUp(key:Key):Bool {
-    if (handlingUpdate != null) return true;
+    if (handlingUpdate != null || selection == GameOver) return true;
     switch (key) {
       case Space:
       localController.queuedActions.push(EndTurn);
@@ -635,10 +743,12 @@ enum UIAction {
   ConfirmModal;
   Stats;
   StatsTooltip(tt:Tooltip);
+  Button(i:Int);
 }
 
 enum UISelection {
   None;
+  GameOver;
   STileBase(t:Tile, ts:Array<UISelection>, i:Int);
   STile(t:Tile);
   SUnit(u:Unit);
@@ -653,6 +763,7 @@ enum UISelection {
 enum ModalTarget {
   MTPosition(x:Int, y:Int);
   MTTile(t:Tile);
+  MTCenter;
 }
 
 typedef TooltipProto = {
