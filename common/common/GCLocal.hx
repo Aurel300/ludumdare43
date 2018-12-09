@@ -38,10 +38,10 @@ class GCLocal implements GameController {
         case Attack(target):
         var attack = u.summariseAttack(target);
         if (attack.willStrike) queuedUpdates.push(AttackUnit(u, target, attack.dmgA, true));
-        if (attack.killD) queuedUpdates.push(RemoveUnit(target));
+        if (attack.killD) queuedUpdates.push(RemoveUnit(target, true));
         if (attack.willTurn) queuedUpdates.push(TurnUnit(target));
         if (attack.willCounter) queuedUpdates.push(AttackUnit(target, u, attack.dmgD, false));
-        if (attack.killA) queuedUpdates.push(RemoveUnit(u));
+        if (attack.killA) queuedUpdates.push(RemoveUnit(u, true));
         case Repair(target):
         var repair = u.summariseRepair(target);
         queuedUpdates.push(RepairUnit(u, target, repair.rep));
@@ -56,7 +56,7 @@ class GCLocal implements GameController {
         var sacrifice = u.summariseSacrifice();
         u.owner.favour += sacrifice.reward;
         u.owner.sacrificed = true;
-        queuedUpdates.push(RemoveUnit(u));
+        queuedUpdates.push(RemoveUnit(u, false));
       }
     }
     function handleBuild(ut:UnitType, at:Building):Void {
@@ -157,7 +157,7 @@ class GCLocal implements GameController {
       case AttackUnit(u, target, dmg, attacking):
       if (!attacking) u.stats.defended = true;
       target.stats.HP -= dmg;
-      case RemoveUnit(u):
+      case RemoveUnit(u, _):
       u.tile.units.remove(u);
       if (u.owner != null) u.owner.recomputeVision(g.map.tiles);
       case RepairUnit(_, target, rep):

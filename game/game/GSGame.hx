@@ -165,15 +165,15 @@ class GSGame extends JamState {
   public function new(app) {
     I = this;
     super("game", app);
-    initMap(Map.MAPS["desert_agony"]);
+    //initMap(Map.MAPS["desert_agony"]);
   }
   
-  public function initMap(mf:haxe.io.Bytes):Void {
+  public function initMap(mf:haxe.io.Bytes, f1:Faction, f2:Faction):Void {
     var gameController = new GCLocal();
     var playerController = new PCLocal();
     var players = [
-         new Player("P1", Juggernauts, playerController)
-        ,new Player("P2", Juggernauts, playerController)
+         new Player("P1", f1, playerController)
+        ,new Player("P2", f2, playerController)
       ];
     var map = new Map(players, mf);
     mapRenderer = new MapRenderer(map);
@@ -208,10 +208,14 @@ class GSGame extends JamState {
        ui.keyUp(key)
     || ({
       switch (key) {
+        case KeyM: GSGame.musicOn = !GSGame.musicOn;
+        case KeyN: GSGame.soundOn = !GSGame.soundOn;
         case KeyQ: mapRenderer.turnAngle(-1);
         case KeyE: mapRenderer.turnAngle(1);
+#if DEBUG
         case KeyP: // switch to editor
         st("editor");
+#end
         /*
         case KeyP: // import map, switch to editor
         GSEditor.map = Game.I.map;

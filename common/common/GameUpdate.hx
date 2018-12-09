@@ -3,7 +3,7 @@ package common;
 enum GameUpdate {
   MoveUnit(u:Unit, from:TilePosition, to:TilePosition, mpCost:Int);
   AttackUnit(au:Unit, du:Unit, dmg:Int, attack:Bool);
-  RemoveUnit(u:Unit);
+  RemoveUnit(u:Unit, death:Bool);
   RepairUnit(u:Unit, target:Unit, rep:Int);
   TurnUnit(u:Unit);
   CaptureBuilding(u:Unit, b:Building, capture:Bool);

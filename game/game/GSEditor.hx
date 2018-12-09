@@ -143,7 +143,7 @@ class GSEditor extends JamState {
         unit.stats.MP = unit.stats.maxMP;
       }
       case KeyQ: // test in game
-      GSGame.I.initMap(map.encode());
+      GSGame.I.initMap(map.encode(), Juggernauts, Juggernauts);
       st("game");
       case _:
     }

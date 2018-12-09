@@ -128,6 +128,14 @@ class Unit {
       };
   }
   
+  public function baseSiege():Bool {
+    var siege = stats.siege;
+    if (owner != null
+      && owner.faction == Juggernauts
+      && owner.favourReached) siege = false;
+    return siege;
+  }
+  
   public function canAttack(target:Unit, attack:Bool, ?from:Tile):Bool {
     if (from == null) from = tile;
     var dist = target.tile.position.distance(from.position);
@@ -136,7 +144,7 @@ class Unit {
       && baseAttack() > 0
       && target.owner != null
       && target.owner != owner
-      && (stats.siege ? ((attack && stats.MP == stats.maxMP) || !attack) : true)
+      && (baseSiege() ? ((attack && stats.MP == stats.maxMP) || !attack) : true)
       && (attack ? true : !stats.defended);
   }
   
@@ -148,8 +156,15 @@ class Unit {
   }
   
   public function canCapture(target:Building):Bool {
+    var hasCapture = stats.capture;
+    if (owner != null
+      && owner.faction == Harlequins
+      && owner.favourReached) hasCapture = true;
+    else if (owner != null
+      && owner.faction == Harlequins
+      && type.category() == Flying) hasCapture = true;
     return target.tile.position.equals(tile.position)
-      && stats.capture
+      && hasCapture
       && target.owner != owner;
   }
   
@@ -162,7 +177,16 @@ class Unit {
   
   public function baseAttack():Int {
     var atk = stats.ATK;
-    if (stats.charge) atk += startingTile.position.distance(tile.position);
+    if (owner != null
+      && owner.faction == Juggernauts
+      && (baseSiege() || stats.charge)) atk += 1;
+    if (stats.charge) {
+      var dist = startingTile.position.distance(tile.position);
+      if (owner != null
+        && owner.faction == Juggernauts
+        && owner.favourReached) atk += dist * 2;
+      else atk += dist;
+    }
     if (stats.healthATK) atk += stats.HP;
     if (tile.buildings.length > 0
       && tile.buildings[0].type == BTFortress
@@ -172,6 +196,22 @@ class Unit {
   
   public function baseDefense():Int {
     var def = stats.DEF;
+    if (owner != null
+      && owner.faction == Harlequins
+      && type.category() == Flying
+      && owner.favourReached) def += 1;
+    if (owner != null
+      && owner.faction == Zephyrs
+      && type.category() == Ground
+      && owner.favourReached
+      && tile.terrain != TTPlain) def += 1;
+    if (owner != null
+      && owner.faction == Reapers
+      && (type == Wolf || type == Spider)
+      && owner.favourReached) def += 1;
+    if (owner != null
+      && owner.faction == Reapers
+      && (type == Monkey || type == Bat || type == Frog)) def = 4;
     if (tile.buildings.length > 0
       && tile.buildings[0].type == BTFortress
       && tile.buildings[0].owner == owner) def += 1;
@@ -190,7 +230,7 @@ class Unit {
     return 0.maxI(if (attacking) {
         baseAttack() - target.baseDefense();
       } else {
-        if (stats.siege) 0;
+        if (baseSiege()) 0;
         else baseAttack() - target.baseDefense();
       });
   }

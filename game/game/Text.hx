@@ -63,7 +63,7 @@ class Text {
   }
   
   public static function leftOp(txt:String, ?ft:FontType = Regular):Bitmap {
-    var res = Platform.createBitmap(200, 16, 0);
+    var res = Platform.createBitmap(300, 16, 0);
     var end = fonts[ft].render(res, 0, 0, txt, fonts);
     return res.fluent >> new Cut(0, 0, end.x + 6, 16);
   }

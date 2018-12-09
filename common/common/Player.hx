@@ -16,6 +16,11 @@ class Player {
   public var lost:Bool = false;
   public var vision:Vector<Bool>;
   
+  public var favourReached(get, never):Bool;
+  private function get_favourReached():Bool {
+    return favour >= FAVOUR_LIMIT;
+  }
+  
   public function new(name:String, faction:Faction, controller:PlayerController) {
     this.name = name;
     this.faction = faction;

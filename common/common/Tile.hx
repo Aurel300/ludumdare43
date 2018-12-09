@@ -48,7 +48,11 @@ class Tile {
   
   public function tdf(u:Unit):InfInt {
     var tdf = terrain.tdf(u.type.category());
-    if (u.stats.affinity.indexOf(terrain) != -1) tdf = Num(1);
+    var hasAffinity = u.stats.affinity.indexOf(terrain) != -1;
+    if (u.owner != null
+      && u.owner.faction == Zephyrs
+      && (terrain == TTDesert || terrain == TTHill)) hasAffinity = true;
+    if (hasAffinity) tdf = Num(1);
     if (u.type.category() == Swimming
       && buildings.length > 0
       && buildings[0].type == BTDock

@@ -76,7 +76,7 @@ class Sfx {
   public static function tick():Void {
     musicChannel.setVolume(GSGame.musicOn ? 1 : 0);
     if (!musicChannel.playing) {
-      startMusic();
+      startMusic((currentMusic == "Intro" || currentMusic == "Menu") ? "Menu" : null);
     }
     //if (music != null) for (k in music.keys()) music[k].tick(currentMusic == k);
   }

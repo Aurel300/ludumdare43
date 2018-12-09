@@ -15,7 +15,7 @@ class UI {
       ,{name: '${Text.t(RegularGreen)}Forge', t: "Increases production tier by 1."}
       ,{name: '${Text.t(RegularGreen)}Fortress', t: "Adds +1 ATK, +1 DEF, and +1 VIS to any friendly unit on this tile."}
       ,{has: u -> u.stats.charge, name: '${Text.t(RegularRed)}Charge', t: "ATK increased by 1 for each hex tile away from start."}
-      ,{has: u -> u.stats.siege, name: '${Text.t(RegularRed)}Siege', t: "Can only attack when MOV is full. Cannot counter- strike."}
+      ,{has: u -> u.baseSiege(), name: '${Text.t(RegularRed)}Siege', t: "Can only attack when MOV is full. Cannot counter- strike."}
       ,{has: u -> u.stats.healthATK, name: '${Text.t(RegularRed)}Health attack', t: "ATK increased by current HP."}
       ,{has: u -> u.stats.kamikaze, name: '${Text.t(RegularRed)}Kamikaze', t: "Attacking destroys self."}
       ,{has: u -> u.stats.medusaGaze, name: '${Text.t(RegularRed)}Medusa gaze', t: "Any attacked unit instantly turns neutral."}
@@ -115,20 +115,20 @@ class UI {
     localController.updateObservers.push(tick);
     
     buttons = [
-       {down: false, x: 500 - 16, y: 0, icon: "music", click: () -> GSGame.musicOn = !GSGame.musicOn, tt: "Toggle music"}
-      ,{down: false, x: 500 - 16, y: 16, icon: "sound", click: () -> GSGame.soundOn = !GSGame.soundOn, tt: "Toggle sound"}
-      ,{down: false, x: 500 - 16, y: 32, icon: "fullscreen", click: () -> {}, tt: "Toggle fullscreen"}
-      ,{down: false, x: 150, y: 300 - 16, icon: "hp", click: () -> mapRenderer.hpBarShow.toggle(), tt: "Toggle HP bars"}
-      ,{down: false, x: 166, y: 300 - 16, icon: "arrow_left", click: () -> {}, hold: () -> mapRenderer.camX += 3, tt: "Move camera to the left"}
-      ,{down: false, x: 198, y: 300 - 16, icon: "arrow_right", click: () -> {}, hold: () -> mapRenderer.camX -= 3, tt: "Move camera to the right"}
-      ,{down: false, x: 182, y: 300 - 32, icon: "arrow_up", click: () -> {}, hold: () -> mapRenderer.camY += 3, tt: "Move camera up"}
-      ,{down: false, x: 182, y: 300 - 16, icon: "arrow_down", click: () -> {}, hold: () -> mapRenderer.camY -= 3, tt: "Move camera down"}
-      ,{down: false, x: 166, y: 300 - 32, icon: "turn_left", click: () -> mapRenderer.turnAngle(-1), tt: "Turn camera to the left"}
-      ,{down: false, x: 198, y: 300 - 32, icon: "turn_right", click: () -> mapRenderer.turnAngle(1), tt: "Turn camera to the right"}
+       {down: false, x: 500 - 16, y: 0, icon: "music", click: () -> GSGame.musicOn = !GSGame.musicOn, tt: "(M) Toggle music"}
+      ,{down: false, x: 500 - 16, y: 16, icon: "sound", click: () -> GSGame.soundOn = !GSGame.soundOn, tt: "(N) Toggle sound"}
+      //,{down: false, x: 500 - 16, y: 32, icon: "fullscreen", click: () -> {}, tt: "Toggle fullscreen"}
+      ,{down: false, x: 150, y: 300 - 16, icon: "hp", click: () -> mapRenderer.hpBarShow.toggle(), tt: "(Tab) Toggle HP bars"}
+      ,{down: false, x: 166, y: 300 - 16, icon: "arrow_left", click: () -> {}, hold: () -> mapRenderer.camX += 3, tt: "(A $$) Move camera to the left"}
+      ,{down: false, x: 198, y: 300 - 16, icon: "arrow_right", click: () -> {}, hold: () -> mapRenderer.camX -= 3, tt: "(D #) Move camera to the right"}
+      ,{down: false, x: 182, y: 300 - 32, icon: "arrow_up", click: () -> {}, hold: () -> mapRenderer.camY += 3, tt: "(W `) Move camera up"}
+      ,{down: false, x: 182, y: 300 - 16, icon: "arrow_down", click: () -> {}, hold: () -> mapRenderer.camY -= 3, tt: "(S @) Move camera down"}
+      ,{down: false, x: 166, y: 300 - 32, icon: "turn_left", click: () -> mapRenderer.turnAngle(-1), tt: "(Q) Turn camera to the left"}
+      ,{down: false, x: 198, y: 300 - 32, icon: "turn_right", click: () -> mapRenderer.turnAngle(1), tt: "(E) Turn camera to the right"}
       ,{down: false, x: 500 - 24, y: 300 - 24, big: true, icon: "end_turn", click: () -> {
           localController.queuedActions.push(EndTurn);
           clearUI();
-        }, tt: "End turn"}
+        }, tt: "(Space) End turn"}
     ];
   }
   
@@ -205,7 +205,9 @@ class UI {
       case MoveUnit(u, _, _, _):
       selectTile(u.tile);
       u.offX = u.offY = 0; u.displayTile = null; u.actionRelevant = false; done();
-      case RemoveUnit(u): deselect(); done();
+      case RemoveUnit(u, death):
+      Sfx.play(death ? "death" : "sacrifice");
+      deselect(); done();
       case TurnUnit(_) | BuildUnit(_, _, _) | CaptureUnit(_): done();
       case GameOver(w):
       if (selection != GameOver) Sfx.fanfare();
@@ -321,7 +323,7 @@ class UI {
       Text.render(to, 4, 14,
         '${Text.t(Small)}CYC: ${localController.activePlayer.cycles} (+${localController.activePlayer.lastCycleGain})'
         + (
-          localController.activePlayer.favour >= Player.FAVOUR_LIMIT
+          localController.activePlayer.favourReached
           ? '\n${Text.t(SmallYellow)}GOD FAVOUR ACHIEVED!'
           : '\n${Text.t(Small)}FAV: ${localController.activePlayer.favour}/${Player.FAVOUR_LIMIT}')
         );
@@ -547,7 +549,7 @@ class UI {
                 }
                 ,None
                 ,MTCenter
-                ,"Surrender the battle?"
+                ,"Really surrender?"
               ));
             emitButton(16, 4, () -> selection = Sacrifice(b, selection));
           }
@@ -606,7 +608,7 @@ class UI {
     
     if (selection == GameOver) {
       if (mGameOver.show.isOn) {
-        Main.I.st("editor");
+        Main.I.st("menu");
       }
       return true;
     }
@@ -675,16 +677,18 @@ class UI {
       return false;
     }
     switch [selection, mouseAction] {
-      case [_, ConfirmModal]: modal.show.setTo(false); if (modal.confirmAction != null) modal.confirmAction();
-      case [_, CancelModal]: modal.show.setTo(false); selection = modal.cancelAction;
+      case [_, ConfirmModal]: Sfx.play("select"); modal.show.setTo(false); if (modal.confirmAction != null) modal.confirmAction();
+      case [_, CancelModal]: Sfx.play("gimp"); modal.show.setTo(false); selection = modal.cancelAction;
       case [_, Button(i)]:
-      if (buttons[i].down) buttons[i].click();
-      for (b in buttons) b.down = false;
-      case [STileBase(_, ts, i), SelectTile(target)]: switch (ts[i]) {
+      if (buttons[i].down) {
+        Sfx.play("select");
+        buttons[i].click();
+      }
+      case [STileBase(_, ts, i), SelectTile(target)]: Sfx.play("select"); switch (ts[i]) {
         case SUnit(u): if (!handleUnitOrder(u, target)) selectTile(target);
         case _: selectTile(target);
       }
-      case [Sacrifice(_, cancel), SelectTile(target)]:
+      case [Sacrifice(_, cancel), SelectTile(target)]: Sfx.play("select");
       if (target.units.length > 0
           && target.units[0].owner == localController.activePlayer) {
         var unit = target.units[0];
@@ -703,13 +707,19 @@ class UI {
             ,text
           );
       }
-      case [Sacrifice(_, cancel), Stats]: selection = cancel;
-      case [_, SelectTile(t)]: selectTile(t);
+      case [Sacrifice(_, cancel), Stats]: Sfx.play("gimp"); selection = cancel;
+      case [_, SelectTile(t)]: Sfx.play("select"); selectTile(t);
       case [_, Stats]:
       case [_, StatsTooltip(tt)]:
-      if (tt.click != null) tt.click();
-      case [_, None]: return false;
+      if (tt.click != null) {
+        Sfx.play("select");
+        tt.click();
+      }
+      case [_, None]:
+      for (b in buttons) b.down = false;
+      return false;
     }
+    for (b in buttons) b.down = false;
     return true;
   }
   

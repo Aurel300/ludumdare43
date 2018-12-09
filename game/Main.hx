@@ -43,6 +43,10 @@ class Main extends Application {
             ,Embed.getSound("hit_swordfish", "wav/hit_swordfish.wav")
             ,Embed.getSound("hit_wolf", "wav/hit_wolf.wav")
             ,Embed.getSound("repair", "wav/repair.wav")
+            ,Embed.getSound("death", "wav/Death.wav")
+            ,Embed.getSound("gimp", "wav/Gimp.wav")
+            ,Embed.getSound("sacrifice", "wav/Sacrifice.wav")
+            ,Embed.getSound("select", "wav/Select.wav")
             ,Embed.getSound("music_ActuallyGood", "music/ActuallyGood.mp3")
             ,Embed.getSound("music_Angelic", "music/Angelic.mp3")
             ,Embed.getSound("music_Final", "music/Final.mp3")
@@ -84,6 +88,10 @@ class Main extends Application {
               ,"music_Victory4"
               ,"music_VictoryFaction2"
               ,"music_VictoryQuestionMark"
+              ,"death"
+              ,"gimp"
+              ,"sacrifice"
+              ,"select"
             ], (am, _) -> { Sfx.init(am); false; })
             
             ,new AssetTrigger("gameA", ["game"], (am, _) -> { GSGame.load(am.getBitmap); false; })
@@ -97,9 +105,18 @@ class Main extends Application {
         ,Keyboard
         ,Mouse
       ]);
-    preloader = new TNPreloader(this, "game", true);
+    preloader = new TNPreloader(this, "menu",
+#if DEBUG
+        true
+#else
+        false
+#end
+      );
+    addState(new GSMenu(this));
     addState(new GSGame(this));
+#if DEBUG
     addState(new GSEditor(this));
+#end
     mainLoop();
   }
   
